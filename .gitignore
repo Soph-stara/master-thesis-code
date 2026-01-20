@@ -1,0 +1,15 @@
+# data (do not commit raw Transkribus exports)
+data/raw/
+
+# environment / secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
