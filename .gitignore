@@ -1,3 +1,8 @@
+#Adding files to .gitignore instructs Git to exclude automatically generated and downloaded data 
+#from version control while retaining only the source code and notebooks.
+# This keeps the repository clean and focused on the essential components.
+
+
 # data (do not commit raw Transkribus exports)
 data/raw/
 
