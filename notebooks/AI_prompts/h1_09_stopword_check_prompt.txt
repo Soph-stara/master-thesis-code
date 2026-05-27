@@ -1,0 +1,46 @@
+09_stopwords.ipynb263 Zeilenipynbplease read this jupyter notebook. H1 total tokens before stopword removal: 147965 
+H1 total tokens after stopword removal: 80393can I check what words it removed? I am afraid that it removed too much. 
+write one cell with checks15:25Claude hat geantwortet: Here's a cell you can add to your notebook to inspect what was removed:Here's a cell you can add to your notebook to inspect what was removed:
+python# --- Stopword Removal Audit ---
+
+# Rebuild a flat list of all original tokens (reload before removal)
+df_check = pd.read_csv("/Users/sophiehamann/master-thesis-code/data/processed/07_h1_normalized.csv")
+df_check["tokens"] = df_check["tokens"].apply(ast.literal_eval)
+
+all_original = [token for tokens in df_check["tokens"] for token in tokens]
+all_kept     = [token for tokens in df_h1["tokens"]    for token in tokens]
+
+original_vocab = set(all_original)
+kept_vocab     = set(all_kept)
+removed_vocab  = original_vocab - kept_vocab
+
+# 1. Which unique words were removed?
+print(f"Unique words removed: {len(removed_vocab)}")
+print(sorted(removed_vocab), "\n")
+
+# 2. How often did each removed word appear? (top 30 by frequency)
+from collections import Counter
+original_counts = Counter(all_original)
+removed_counts  = {w: original_counts[w] for w in removed_vocab}
+top_removed     = sorted(removed_counts.items(), key=lambda x: x[1], reverse=True)[:30]
+print("Top 30 removed words by frequency:")
+for word, count in top_removed:
+    print(f"  {word:20s} {count:>6}")
+
+# 3. Spot-check: are any negations in the removed set? (should be empty)
+negations = {"no", "not", "nor", "never", "neither", "nothing", "nowhere", "nobody"}
+removed_negations = negations & removed_vocab
+print(f"\nNegations accidentally removed: {removed_negations or 'none — all good'}")
+
+# 4. Reduction summary
+print(f"\nTokens before : 147965")
+print(f"Tokens after  : 80393")
+print(f"Reduction     : {(1 - 80393/147965)*100:.1f}%")
+The four checks give you:
+
+Full removed vocabulary — every unique word that got filtered out
+Top 30 by frequency — the words that contributed most to the 46% reduction, so you can quickly spot anything that looks wrong
+Negation safety check — confirms no/not/never etc. weren't accidentally removed
+Reduction summary — your 46% is slightly above Chai's expected 40–50% range, but well within it
+
+If anything in the removed list looks suspicious, you can add it back with stop_words.discard("word") before re-applying remove_stopwords.

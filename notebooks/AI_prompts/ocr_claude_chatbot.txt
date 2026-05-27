@@ -1,0 +1,193 @@
+xml
+
+
+03_ocr_validation_new.ipynb
+293 Zeilen
+
+ipynb
+
+I want to see how good my ocr is. 
+
+I downloaded my ground truth file in xml format from transkribus. it is around 135 pages in total. 
+
+My whole parsed corpus has over 2.500 pages. 
+
+I used the cer calculation method from official transkribus documentation: https://blog.transkribus.org/en/how-is-the-cer-calculated-in-transkribus
+
+I want to know whether this cell calculates cer correctly
+from jiwer import cer, process_characters
+
+gt_text  = " ".join(df_gt["text"].dropna().tolist())
+ocr_text = " ".join(df_ocr["text"].dropna().tolist())
+
+# overall CER
+error_rate = cer(gt_text, ocr_text)
+print(f"Character Error Rate: {error_rate:.2%}")
+
+# breakdown by error type
+details = process_characters(gt_text, ocr_text)
+print(f"Insertions:     {details.insertions}")
+print(f"Substitutions:  {details.substitutions}")
+print(f"Deletions:      {details.deletions}")
+print(f"Total characters in ground truth: {details.hits + details.deletions + details.substitutions}")
+
+Mehr anzeigen
+11:38
+
+Fetched: How is the CER calculated?
+Fetched: How is the CER calculated?
+There's a fundamental problem with your CER calculation — not with the formula itself, but with what you're comparing. Let me explain:
+
+The Core Problem: Mismatched Corpora
+Your ground truth has 1,490 regions from ~135 pages, but your OCR corpus has 26,941 regions from ~2,500 pages. You're concatenating all text from both into two long strings and comparing them — but jiwer's CER treats this as a sequential alignment problem. With the OCR text being ~18× longer, the aligner sees almost everything in the OCR as spurious insertions, which is exactly what you got: 956,113 insertions vs. only 4,563 substitutions.
+
+This is why you got a CER of 1,552% — it's not measuring transcription quality, it's measuring the size mismatch.
+
+What Transkribus Actually Does
+Transkribus compares the automatic transcription of the same pages against the correct original transcription for those same pages, then counts incorrect characters as a percentage of the total characters in ground truth. The key is page-for-page alignment — the same 135 pages, compared against each other. 
+transkribus
+
+How to Fix It
+You need to compare only the OCR output for the same ~135 pages that are in your ground truth, not the entire 2,500-page corpus.
+
+python
+# Step 1: identify which source files are in the ground truth
+gt_files = set(df_gt["source_file"].unique())
+
+# Step 2: filter the OCR dataframe to only those files
+df_ocr_matched = df_ocr[df_ocr["source_file"].isin(gt_files)]
+
+# Step 3: now compute CER on matched text
+gt_text  = " ".join(df_gt["text"].dropna().tolist())
+ocr_text = " ".join(df_ocr_matched["text"].dropna().tolist())
+
+error_rate = cer(gt_text, ocr_text)
+But watch out — your source_file paths might not match between the two DataFrames (different base directories). If that's the case, extract just the filename:
+
+python
+import os
+
+df_gt["filename"]  = df_gt["source_file"].apply(os.path.basename)
+df_ocr["filename"] = df_ocr["source_file"].apply(os.path.basename)
+
+df_ocr_matched = df_ocr[df_ocr["filename"].isin(df_gt["filename"].unique())]
+The Formula Itself is Correct
+The jiwer CER formula matches Transkribus exactly: CER = (i + s + d) / n, where n is the total number of characters in the ground truth. So once you're comparing the right pages, the code is fine. 
+transkribus
+
+In short: fix the input data before the calculation, and your 1,552% will likely drop to something meaningful (hopefully under 10%).
+
+how can i check whether this worked?
+
+# Step 1: identify which source files are in the ground truth
+gt_files = set(df_gt["source_file"].unique())
+
+# Step 2: filter the OCR dataframe to only those files
+df_ocr_matched = df_ocr[df_ocr["source_file"].isin(gt_files)]
+
+# Step 3: now compute CER on matched text
+gt_text  = " ".join(df_gt["text"].dropna().tolist())
+ocr_text = " ".join(df_ocr_matched["text"].dropna().tolist())
+
+error_rate = cer(gt_text, ocr_text)
+
+
+import os
+
+df_gt["filename"]  = df_gt["source_file"].apply(os.path.basename)
+df_ocr["filename"] = df_ocr["source_file"].apply(os.path.basename)
+
+df_ocr_matched = df_ocr[df_ocr["filename"].isin(df_gt["filename"].unique())]
+Mehr anzeigen
+11:41
+The most important check is whether df_ocr_matched actually has rows — if the filenames don't match, it'll be empty and you'll still get a wrong CER. Add these sanity checks:
+
+python
+import os
+
+df_gt["filename"]  = df_gt["source_file"].apply(os.path.basename)
+df_ocr["filename"] = df_ocr["source_file"].apply(os.path.basename)
+
+# CHECK 1: see what filenames look like in each df
+print("GT filenames sample:")
+print(df_gt["filename"].unique()[:5])
+
+print("\nOCR filenames sample:")
+print(df_ocr["filename"].unique()[:5])
+
+# CHECK 2: how many files actually matched?
+gt_filenames = set(df_gt["filename"].unique())
+ocr_filenames = set(df_ocr["filename"].unique())
+
+matched = gt_filenames & ocr_filenames
+print(f"\nGT files:        {len(gt_filenames)}")
+print(f"OCR files:       {len(ocr_filenames)}")
+print(f"Matched files:   {len(matched)}")
+print(f"GT files NOT found in OCR: {gt_filenames - ocr_filenames}")
+
+# CHECK 3: does df_ocr_matched have rows?
+df_ocr_matched = df_ocr[df_ocr["filename"].isin(gt_filenames)]
+print(f"\ndf_ocr_matched rows: {len(df_ocr_matched)}")  # should be > 0
+print(f"df_gt rows:          {len(df_gt)}")             # should be similar magnitude
+The key things to look for:
+
+"GT files NOT found in OCR" — if this is non-empty, the filenames differ and you need to reconcile them (e.g. one uses combined.xml while the other uses page-level filenames like page_001.xml)
+df_ocr_matched rows — should be in a similar ballpark to df_gt rows (both ~1,490), not 0 or 26,941
+The filename samples — paste those here if something looks off, since that's where mismatches usually hide
+If matched comes back 0, the most likely culprit is that your ground truth is a single combined.xml while your OCR corpus has individual per-page filenames — in which case matching by filename won't work and you'd need a different strategy (e.g. matching by region text or rebuilding the OCR from the same page files).
+
+this is hte output. 
+GT filenames sample: ['combined.xml']  OCR filenames sample: ['heresies_08_combined.xml' 'heresies_09_combined.xml'  'heresies_16_combined.xml' 'heresies_11_combined.xml'  'heresies_04_combined.xml']  GT files:        1 OCR files:       27 Matched files:   0 GT files NOT found in OCR: {'combined.xml'}  df_ocr_matched rows: 0 df_gt rows:          1490
+
+11:42
+As suspected — your GT is one big combined.xml while your OCR has per-issue files (heresies_08_combined.xml, etc.). Filename matching won't work here.
+
+You need to figure out which issues are actually in your ground truth. The best way is to look at the text content itself:
+
+python
+# What issues/pages does your GT cover?
+# Look at the GT text for clues
+print("GT text sample (first 5 rows):")
+print(df_gt["text"].head(10).tolist())
+
+# And check your OCR filenames — which issues are there?
+print("\nAll OCR files:")
+print(sorted(df_ocr["filename"].unique()))
+Then once you know which issues are in your GT (e.g. maybe it's heresies_08 and heresies_09), filter manually:
+
+python
+# Example — replace with the actual issue numbers you identify
+gt_issues = ["heresies_08_combined.xml", "heresies_09_combined.xml"]  # adjust this!
+df_ocr_matched = df_ocr[df_ocr["filename"].isin(gt_issues)]
+
+print(f"df_ocr_matched rows: {len(df_ocr_matched)}")
+But there's a deeper problem worth flagging: even if you identify the right issues, your GT is one merged file with 135 pages across potentially multiple issues, and your OCR files are per-issue. This means:
+
+GT row order may not align with OCR row order
+The concatenated string comparison will still be approximate
+The cleanest approach for a valid CER would be to go back to Transkribus and export the ground truth as per-issue XML files (matching your OCR structure), so you can match issue-to-issue precisely. That gives you a meaningful, comparable result.
+
+For now — what does df_gt["text"].head(10) show? That'll tell us which issue(s) your GT covers.
+
+I will manually put together the same pages from the gt dataset to the actually transcribed dataset.
+
+11:42
+That's the most reliable approach given your data structure. To make the manual matching as easy as possible, here's what I'd suggest first:
+
+python
+# Get a clear picture of what's in your GT to guide the manual matching
+print("=== GROUND TRUTH ===")
+print(f"Total regions: {len(df_gt)}")
+print(f"\nRegion types:")
+print(df_gt["region_type"].value_counts())
+print(f"\nFirst 20 text snippets:")
+for i, row in df_gt.head(20).iterrows():
+    print(f"  [{row['region_type']}] {row['text'][:80]}")
+This will show you the actual content — headings, page numbers, etc. — so you can identify exactly which issue(s) and page range are in your GT. Then you can filter df_ocr to just those rows.
+
+Once you've done the matching, come back with:
+
+Which OCR file(s) the GT maps to
+Which page range within those files
+And I can help you write the precise filter to create df_ocr_matched correctly before running the CER. The goal is that len(df_ocr_matched) ends up close to len(df_gt) (1,490 regions), which would confirm the match is right.
+

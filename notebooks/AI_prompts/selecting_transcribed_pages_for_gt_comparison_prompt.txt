@@ -1,0 +1,1662 @@
+
+combined.xml
+I have a ground truth xml file. you can find it here: /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml
+
+I need to find the corresponding xml pages in order to compare them and calculate the character error rate. please create a folder and put into the folder the single xml pages which were transcribed which are the same pages as found in the ground truth xml file. 
+All of the folders with the single page xml transcription can be found here:
+/Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml
+/Users/sophiehamann/master-thesis-code/data/raw/heresies_02_pagexml
+
+and so on. please create a new file for this script.
+Let me first read the ground truth XML and explore the source directories to understand the structure.
+
+Read combined.xml
+Bash List all pagexml directories
+IN
+ls /Users/sophiehamann/master-thesis-code/data/raw/ | grep pagexml
+
+OUT
+heresies_01_pagexml
+heresies_02_pagexml
+heresies_03_pagexml
+heresies_04_pagexml
+heresies_05_pagexml
+heresies_06_pagexml
+heresies_07_pagexml
+heresies_08_pagexml
+heresies_09_pagexml
+heresies_10_pagexml
+heresies_11_pagexml
+heresies_12_pagexml
+heresies_13_pagexml
+heresies_14_pagexml
+heresies_15_pagexml
+heresies_16_pagexml
+heresies_17_pagexml
+heresies_18_pagexml
+heresies_19_pagexml
+heresies_20_pagexml
+heresies_21_pagexml
+heresies_22_pagexml
+heresies_23_pagexml
+heresies_24_pagexml
+heresies_25_pagexml
+heresies_26_pagexml
+heresies_27_pagexml
+Bash Extract pageIds from ground truth XML
+IN
+grep -o 'pageId="[0-9]*"' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml | head -20
+
+OUT
+pageId="105407233"
+Bash List files in first pagexml directory
+IN
+ls /Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/ | head -20
+
+OUT
+page_1.xml
+page_10.xml
+page_100.xml
+page_101.xml
+page_102.xml
+page_103.xml
+page_104.xml
+page_105.xml
+page_106.xml
+page_107.xml
+page_108.xml
+page_109.xml
+page_11.xml
+page_110.xml
+page_111.xml
+page_112.xml
+page_113.xml
+page_114.xml
+page_115.xml
+page_116.xml
+Bash Extract image filenames from ground truth XML
+IN
+grep -o 'imageFilename="[^"]*"' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml | head -30
+
+OUT
+imageFilename="0001_p002.jpg"
+imageFilename="0002_p003.jpg"
+imageFilename="0003_p004.jpg"
+imageFilename="0004_p005.jpg"
+imageFilename="0005_p006.jpg"
+imageFilename="0006_p007.jpg"
+imageFilename="0007_p008.jpg"
+imageFilename="0008_p009.jpg"
+imageFilename="0009_p010.jpg"
+imageFilename="0010_p011.jpg"
+imageFilename="0011_p012.jpg"
+imageFilename="0012_p013.jpg"
+imageFilename="0013_p014.jpg"
+imageFilename="0014_p015.jpg"
+imageFilename="0015_p016.jpg"
+imageFilename="0016_p017.jpg"
+imageFilename="0017_p018.jpg"
+imageFilename="0018_p019.jpg"
+imageFilename="0019_p020.jpg"
+imageFilename="0020_p021.jpg"
+imageFilename="0021_p022.jpg"
+imageFilename="0022_p023.jpg"
+imageFilename="0023_p024.jpg"
+imageFilename="0024_p025.jpg"
+imageFilename="0025_p026.jpg"
+imageFilename="0026_p027.jpg"
+imageFilename="0027_p028.jpg"
+imageFilename="0028_p029.jpg"
+imageFilename="0029_p030.jpg"
+imageFilename="0030_p031.jpg"
+Bash Count pages in ground truth XML
+IN
+grep -o 'pageId="[0-9]*"' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml | wc -l && grep -o 'imageFilename="[^"]*"' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml | wc -l
+
+OUT
+       1
+     135
+Bash Count unique image filenames
+IN
+grep -o 'imageFilename="[^"]*"' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml | sort | uniq | wc -l
+
+OUT
+     135
+Bash Check imageFilename in source page XML
+IN
+grep 'imageFilename' /Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/page_1.xml
+
+OUT
+    <Page imageFilename="104610900.jpg" imageWidth="2479" imageHeight="3508">
+Bash Check TranskribbusMetadata and imageFilename in source page
+IN
+grep 'TranskribusMetadata\|imageFilename' /Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/page_1.xml
+
+OUT
+        <TranskribusMetadata docId="11509115" pageId="104610900" pageNr="1" status="IN_PROGRESS" userId="447621" imgUrl="https://files.transkribus.eu/Get?fileType=view&amp;id=NWEWFYMAIPUDDPYUUBMMLBCD" imageId="87781842"/>
+    <Page imageFilename="104610900.jpg" imageWidth="2479" imageHeight="3508">
+Bash Check TranskribusMetadata in ground truth XML
+IN
+grep 'TranskribusMetadata' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml | head -5
+
+OUT
+        <TranskribusMetadata docId="11906961" pageId="105407233" pageNr="1" tsid="260922959" status="GT" userId="447621" imgUrl="https://files.transkribus.eu/Get?fileType=view&amp;id=JTAQOGEZWLSMDJGBOTNJMTNG" xmlUrl="https://files.transkribus.eu/Get?id=RQQNOPJQSXLCSLRLQRUDRKPD" imageId="88485270"/>
+Bash Count and list pages in heresies_01
+IN
+ls /Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/ | wc -l && ls /Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/ | sort -V
+
+OUT
+     116
+page_1.xml
+page_2.xml
+page_3.xml
+page_4.xml
+page_5.xml
+page_6.xml
+page_7.xml
+page_8.xml
+page_9.xml
+page_10.xml
+page_11.xml
+page_12.xml
+page_13.xml
+page_14.xml
+page_15.xml
+page_16.xml
+page_17.xml
+page_18.xml
+page_19.xml
+page_20.xml
+page_21.xml
+page_22.xml
+page_23.xml
+page_24.xml
+page_25.xml
+page_26.xml
+page_27.xml
+page_28.xml
+page_29.xml
+page_30.xml
+page_31.xml
+page_32.xml
+page_33.xml
+page_34.xml
+page_35.xml
+page_36.xml
+page_37.xml
+page_38.xml
+page_39.xml
+page_40.xml
+page_41.xml
+page_42.xml
+page_43.xml
+page_44.xml
+page_45.xml
+page_46.xml
+page_47.xml
+page_48.xml
+page_49.xml
+page_50.xml
+page_51.xml
+page_52.xml
+page_53.xml
+page_54.xml
+page_55.xml
+page_56.xml
+page_57.xml
+page_58.xml
+page_59.xml
+page_60.xml
+page_61.xml
+page_62.xml
+page_63.xml
+page_64.xml
+page_65.xml
+page_66.xml
+page_67.xml
+page_68.xml
+page_69.xml
+page_70.xml
+page_71.xml
+page_72.xml
+page_73.xml
+page_74.xml
+page_75.xml
+page_76.xml
+page_77.xml
+page_78.xml
+page_79.xml
+page_80.xml
+page_81.xml
+page_82.xml
+page_83.xml
+page_84.xml
+page_85.xml
+page_86.xml
+page_87.xml
+page_88.xml
+page_89.xml
+page_90.xml
+page_91.xml
+page_92.xml
+page_93.xml
+page_94.xml
+page_95.xml
+page_96.xml
+page_97.xml
+page_98.xml
+page_99.xml
+page_100.xml
+page_101.xml
+page_102.xml
+page_103.xml
+page_104.xml
+page_105.xml
+page_106.xml
+page_107.xml
+page_108.xml
+page_109.xml
+page_110.xml
+page_111.xml
+page_112.xml
+page_113.xml
+page_114.xml
+page_115.xml
+page_116.xml
+Bash Get last imageFilenames from ground truth
+IN
+grep -o 'imageFilename="[^"]*"' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml | tail -20
+
+OUT
+imageFilename="0116_p124.jpg"
+imageFilename="0117_p125.jpg"
+imageFilename="0118_p126.jpg"
+imageFilename="0119_p127.jpg"
+imageFilename="0120_p128.jpg"
+imageFilename="0121_p129.jpg"
+imageFilename="0122_p130.jpg"
+imageFilename="0123_p131.jpg"
+imageFilename="0124_p132.jpg"
+imageFilename="0125_p133.jpg"
+imageFilename="0126_p134.jpg"
+imageFilename="0127_p135.jpg"
+imageFilename="0128_heresies1_page-0001.jpg"
+imageFilename="0129_heresies26_page-0002.jpg"
+imageFilename="0130_heresies26_page-0001.jpg"
+imageFilename="0131_heresies26_page-0003.jpg"
+imageFilename="0132_heresies27_page-0001.jpg"
+imageFilename="0133_heresies27_page-0002.jpg"
+imageFilename="0134_heresies27_page-0003.jpg"
+imageFilename="0135_heresies26_page-0004.jpg"
+Bash Check pageNr and imageFilename in heresies_01 pages
+IN
+grep 'pageNr\|imageFilename' /Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/page_1.xml && echo "---" && grep 'pageNr\|imageFilename' /Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/page_2.xml
+
+OUT
+        <TranskribusMetadata docId="11509115" pageId="104610900" pageNr="1" status="IN_PROGRESS" userId="447621" imgUrl="https://files.transkribus.eu/Get?fileType=view&amp;id=NWEWFYMAIPUDDPYUUBMMLBCD" imageId="87781842"/>
+    <Page imageFilename="104610900.jpg" imageWidth="2479" imageHeight="3508">
+---
+        <TranskribusMetadata docId="11509115" pageId="104611228" pageNr="2" userId="447621" imgUrl="https://files.transkribus.eu/Get?fileType=view&amp;id=RSWXKDSOMVKCZLWNZIDYMHOD" imageId="87780799"/>
+    <Page imageFilename="104611228.jpg" imageWidth="2479" imageHeight="3508">
+Bash Show range of non-heresies imageFilenames
+IN
+grep -o 'imageFilename="[^"]*"' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml | grep -v 'heresies' | head -5 && echo "..." && grep -o 'imageFilename="[^"]*"' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml | grep -v 'heresies' | tail -5
+
+OUT
+imageFilename="0001_p002.jpg"
+imageFilename="0002_p003.jpg"
+imageFilename="0003_p004.jpg"
+imageFilename="0004_p005.jpg"
+imageFilename="0005_p006.jpg"
+...
+imageFilename="0123_p131.jpg"
+imageFilename="0124_p132.jpg"
+imageFilename="0125_p133.jpg"
+imageFilename="0126_p134.jpg"
+imageFilename="0127_p135.jpg"
+Let me look at the notebooks to understand how the combined.xml was created.
+
+Bash List notebooks
+IN
+ls /Users/sophiehamann/master-thesis-code/notebooks/
+
+OUT
+01_transkribus_export.ipynb
+02_xml_parsing_new.ipynb
+03_ocr_validation_new.ipynb
+04_corpus_split.ipynb
+05_remove_formatting.ipynb
+06_tokenization.ipynb
+07_punctuation.ipynb
+08_text_normalization.ipynb
+AI_prompts
+h1_analysis
+h2_analysis
+h3_analysis
+OLD_NOTEBOOKS
+Bash Search for combined.xml creation in notebook 02
+IN
+grep -n 'combined\|ground_truth\|0001_p\|heresies' /Users/sophiehamann/master-thesis-code/notebooks/02_xml_parsing_new.ipynb | head -40
+
+OUT
+52:    "input_folder = DATA_BASE / \"raw\" / \"combined\"\n",
+934:      "                    <Unicode>individually and combined. It means I am political. It</Unicode>\n",
+955:      "                    <Unicode>and action combined.</Unicode>\n",
+11396:      "                    <Unicode>1970. The Summerthing program combined ele-</Unicode>\n",
+41934:      "                    <Unicode>combined or used interchangeably with the</Unicode>\n",
+69104:    "tree = etree.parse(input_folder / \"heresies_01_combined.xml\")\n",
+69210:    "result = parse_one_file(input_folder / \"heresies_01_combined.xml\", namespace)\n",
+Bash Search for ground truth references in notebook 02
+IN
+grep -n 'ground_truth\|combined.xml\|training_data' /Users/sophiehamann/master-thesis-code/notebooks/02_xml_parsing_new.ipynb | head -20
+
+OUT
+69104:    "tree = etree.parse(input_folder / \"heresies_01_combined.xml\")\n",
+69210:    "result = parse_one_file(input_folder / \"heresies_01_combined.xml\", namespace)\n",
+Bash Search for combined.xml creation across notebooks
+IN
+grep -rn 'combined.xml\|ground_truth' /Users/sophiehamann/master-thesis-code/notebooks/ | grep -v '.ipynb_checkpoints' | head -20
+
+OUT
+/Users/sophiehamann/master-thesis-code/notebooks/03_ocr_validation_new.ipynb:107:    "    \"/Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml\",\n",
+/Users/sophiehamann/master-thesis-code/notebooks/03_ocr_validation_new.ipynb:179:      "['combined.xml']\n",
+/Users/sophiehamann/master-thesis-code/notebooks/03_ocr_validation_new.ipynb:182:      "['heresies_08_combined.xml' 'heresies_09_combined.xml'\n",
+/Users/sophiehamann/master-thesis-code/notebooks/03_ocr_validation_new.ipynb:183:      " 'heresies_16_combined.xml' 'heresies_11_combined.xml'\n",
+/Users/sophiehamann/master-thesis-code/notebooks/03_ocr_validation_new.ipynb:184:      " 'heresies_04_combined.xml']\n",
+/Users/sophiehamann/master-thesis-code/notebooks/03_ocr_validation_new.ipynb:189:      "GT files NOT found in OCR: {'combined.xml'}\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:42:    "PROCESSED_GT = PROCESSED_DIR / \"training_data\" / \"ground_truth\""
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1892:      "Saved heresies_01_combined.xml (116 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1894:      "Saved heresies_02_combined.xml (128 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1896:      "Saved heresies_03_combined.xml (122 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1898:      "Saved heresies_04_combined.xml (132 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1900:      "Saved heresies_05_combined.xml (139 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1902:      "Saved heresies_06_combined.xml (132 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1904:      "Saved heresies_07_combined.xml (130 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1906:      "Saved heresies_08_combined.xml (132 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1908:      "Saved heresies_09_combined.xml (100 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1910:      "Saved heresies_10_combined.xml (100 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1912:      "Saved heresies_11_combined.xml (98 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1914:      "Saved heresies_12_combined.xml (100 pages)\n",
+/Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb:1916:      "Saved heresies_13_combined.xml (100 pages)\n",
+Read 03_ocr_validation_new.ipynb
+Now I understand the structure. The ground truth combined.xml has 135 pages with imageFilenames like 0001_p002.jpg (pages from an issue) plus some explicit ones like 0128_heresies1_page-0001.jpg. I need to understand which issue the first 127 pages come from, then match by pageNr.
+
+Bash Search for the ground truth docId in notebook 01
+IN
+grep -n '11906961\|docId' /Users/sophiehamann/master-thesis-code/notebooks/01_transkribus_export.ipynb | head -20
+
+OUT
+277:    "# creating a look up to find the corresponding docId for a given document title\n",
+278:    "doc_map = {d[\"title\"]: d[\"docId\"] for d in documents}\n",
+281:    "# Get all available docIds for download\n",
+304:      "dict_keys(['type', 'docId', 'title', 'uploadTimestamp', 'uploader', 'uploaderId', 'nrOfPages', 'pageId', 'url', 'thumbUrl', 'status', 'fimgStoreColl', 'storeType', 'storeRegion', 'origDocId', 'collectionList', 'attributes', 'labels', 'pageLabels', 'mainColId'])\n",
+305:      "dict_keys(['type', 'docId', 'title', 'uploadTimestamp', 'uploader', 'uploaderId', 'nrOfPages', 'pageId', 'url', 'thumbUrl', 'status', 'fimgStoreColl', 'storeType', 'storeRegion', 'origDocId', 'collectionList', 'attributes', 'labels', 'pageLabels', 'mainColId'])\n",
+306:      "dict_keys(['type', 'docId', 'title', 'uploadTimestamp', 'uploader', 'uploaderId', 'nrOfPages', 'pageId', 'url', 'thumbUrl', 'status', 'fimgStoreColl', 'storeType', 'origDocId', 'collectionList', 'attributes', 'labels', 'pageLabels', 'mainColId'])\n"
+363:    "        doc[\"docId\"],\n",
+403:      "{'type': 'trpDocMetadata', 'docId': 11509115, 'title': 'heresies_01', 'uploadTimestamp': 1760968484613, 'uploader': 'a12248219@unet.univie.ac.at', 'uploaderId': 447621, 'nrOfPages': 116, 'pageId': 104610900, 'url': 'https://files.transkribus.eu/Get?fileType=view&id=NWEWFYMAIPUDDPYUUBMMLBCD', 'thumbUrl': 'https://files.transkribus.eu/Get?fileType=thumb&id=NWEWFYMAIPUDDPYUUBMMLBCD', 'status': 0, 'fimgStoreColl': 'TrpDoc_DEA_11509115', 'storeType': 0, 'origDocId': 0, 'collectionList': {'colList': [{'colId': 2204941, 'colName': 'heresies_collection', 'description': 'created by a12248219@unet.univie.ac.at', 'crowdsourcing': False, 'elearning': False, 'nrOfDocuments': 0, 'isFavorite': False}]}, 'attributes': [], 'labels': [{'labelId': 127, 'name': 'Ready for Export', 'color': '#1E90FF'}], 'pageLabels': [], 'mainColId': 2204941}\n"
+423:      "{'nrOfRegions': 1029, 'nrOfTranscribedRegions': 0, 'nrOfWordsInRegions': 0, 'nrOfLines': 8712, 'nrOfTranscribedLines': 8706, 'nrOfWordsInLines': 63655, 'nrOfWords': 0, 'nrOfTranscribedWords': 0, 'nrOfCharsInLines': 305727, 'nrOfTables': 0, 'nrOfNew': 0, 'nrOfInProgress': 0, 'nrOfDone': 0, 'nrOfFinal': 116, 'nrOfGT': 0, 'docId': 11509115, 'title': 'heresies_01', 'uploadTimestamp': 1760968484613, 'uploader': 'a12248219@unet.univie.ac.at', 'uploaderId': 447621, 'nrOfPages': 116, 'pageId': 104610900, 'url': 'https://files.transkribus.eu/Get?fileType=view&id=NWEWFYMAIPUDDPYUUBMMLBCD', 'thumbUrl': 'https://files.transkribus.eu/Get?fileType=thumb&id=NWEWFYMAIPUDDPYUUBMMLBCD', 'status': 0, 'fimgStoreColl': 'TrpDoc_DEA_11509115', 'storeType': 0, 'origDocId': 0, 'collectionList': {'colList': [{'colId': 2204941, 'colName': 'heresies_collection', 'description': 'created by a12248219@unet.univie.ac.at', 'crowdsourcing': False, 'elearning': False, 'nrOfDocuments': 0, 'isFavorite': False}]}, 'attributes': [], 'labels': [{'labelId': 127, 'name': 'Ready for Export', 'color': '#1E90FF'}], 'pageLabels': [], 'mainColId': 2204941}\n"
+469:      "  <docId>11509115</docId>\n",
+487:      "      <docId>11509115</docId>\n",
+516:      "      <docId>11509115</docId>\n",
+548:      "      <docId>11509115</docId>\n",
+577:      "      <docId>11509115</docId>\n",
+606:      "      <docId>11509115</docId>\n",
+638:      "      <docId>11509115</docId>\n",
+667:      "      <docId>11509115</docId>\n",
+696:      "      <docId>11509115</docId>\n",
+728:      "      <docId>11509115</docId>\n",
+760:      "      <docId>11509115</docId>\n",
+Bash Check pageNr in heresies_01 page 2
+IN
+grep 'TranskribusMetadata' /Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/page_2.xml
+
+OUT
+        <TranskribusMetadata docId="11509115" pageId="104611228" pageNr="2" userId="447621" imgUrl="https://files.transkribus.eu/Get?fileType=view&amp;id=RSWXKDSOMVKCZLWNZIDYMHOD" imageId="87780799"/>
+Bash List ground truth directory contents
+IN
+ls /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/
+
+OUT
+combined_xml
+metadata.xml
+mets.xml
+page
+Bash Extract page numbers from first 127 ground truth pages
+IN
+grep -o 'imageFilename="[^"]*"' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml | grep -v 'heresies' | awk -F'"' '{print $2}' | grep -oP 'p\K[0-9]+' | sort -n | uniq | head -10 && echo "..." && grep -o 'imageFilename="[^"]*"' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml | grep -v 'heresies' | awk -F'"' '{print $2}' | grep -oP 'p\K[0-9]+' | sort -n | uniq | tail -5
+
+OUT
+002
+003
+004
+005
+006
+007
+008
+009
+010
+011
+...
+131
+132
+133
+134
+135
+Bash List page directory in ground truth
+IN
+ls /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/ | head -20
+
+OUT
+0001_p002.xml
+0002_p003.xml
+0003_p004.xml
+0004_p005.xml
+0005_p006.xml
+0006_p007.xml
+0007_p008.xml
+0008_p009.xml
+0009_p010.xml
+0010_p011.xml
+0011_p012.xml
+0012_p013.xml
+0013_p014.xml
+0014_p015.xml
+0015_p016.xml
+0016_p017.xml
+0017_p018.xml
+0018_p019.xml
+0019_p020.xml
+0020_p021.xml
+Bash Read ground truth METS file for issue info
+IN
+cat /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/mets.xml | head -50
+
+OUT
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns3:mets xmlns:ns2="http://www.w3.org/1999/xlink" xmlns:ns3="http://www.loc.gov/METS/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OBJID="11906961" LABEL="heresies_ground_truth" PROFILE="TRP_V1" xsi:schemaLocation="http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd">
+    <ns3:metsHdr CREATEDATE="2026-04-21T10:07:26.459+02:00" LASTMODDATE="2026-04-21T10:07:26.459+02:00" RECORDSTATUS="SUBMITTED">
+        <ns3:agent ROLE="CREATOR" TYPE="ORGANIZATION">
+            <ns3:name>UIBK</ns3:name>
+            <ns3:note>This METS file was generated by Transkribus</ns3:note>
+        </ns3:agent>
+    </ns3:metsHdr>
+    <ns3:amdSec ID="SOURCE">
+        <ns3:sourceMD ID="MD_ORIG">
+            <ns3:mdWrap ID="TRP_DOC_MD" MDTYPE="OTHER">
+                <ns3:xmlData>
+                    <trpDocMetadata>
+                        <docId>11906961</docId>
+                        <title>heresies_ground_truth</title>
+                        <uploadTimestamp>1762178061165</uploadTimestamp>
+                        <uploader>a12248219@unet.univie.ac.at</uploader>
+                        <uploaderId>447621</uploaderId>
+                        <nrOfPages>135</nrOfPages>
+                        <pageId>105407233</pageId>
+                        <url>https://files.transkribus.eu/Get?fileType=view&amp;id=JTAQOGEZWLSMDJGBOTNJMTNG</url>
+                        <thumbUrl>https://files.transkribus.eu/Get?fileType=thumb&amp;id=JTAQOGEZWLSMDJGBOTNJMTNG</thumbUrl>
+                        <status>0</status>
+                        <fimgStoreColl>TrpDoc_DEA_11906961</fimgStoreColl>
+                        <localFolder>/mnt/transkribus/export/TRP_EXPORT_16085081065060219338/11906961/heresies_ground_truth</localFolder>
+                        <origDocId>0</origDocId>
+                        <collectionList>
+                            <colList>
+<colId>2222244</colId>
+<colName>heresies_training_dataset</colName>
+<description>created by a12248219@unet.univie.ac.at</description>
+<crowdsourcing>false</crowdsourcing>
+<elearning>false</elearning>
+<nrOfDocuments>0</nrOfDocuments>
+<isFavorite>false</isFavorite>
+                            </colList>
+                        </collectionList>
+                        <mainColId>2222244</mainColId>
+                    </trpDocMetadata>
+                </ns3:xmlData>
+            </ns3:mdWrap>
+        </ns3:sourceMD>
+    </ns3:amdSec>
+    <ns3:fileSec>
+        <ns3:fileGrp ID="MASTER">
+            <ns3:fileGrp ID="PAGEXML">
+                <ns3:file ID="PAGEXML_1" SEQ="1" MIMETYPE="application/xml" CREATED="2026-04-21T10:03:11.217+02:00" CHECKSUM="3d2fd210866329dfc2d41ff421628112" CHECKSUMTYPE="MD5">
+                    <ns3:FLocat LOCTYPE="OTHER" OTHERLOCTYPE="FILE" ns2:type="simple" ns2:href="page/0001_p002.xml"/>
+                </ns3:file>
+                <ns3:file ID="PAGEXML_2" SEQ="2" MIMETYPE="application/xml" CREATED="2026-04-21T10:03:15.113+02:00" CHECKSUM="afc982a14d8311dce99666dd1fccf767" CHECKSUMTYPE="MD5">
+The individual ground truth page XMLs already exist in the page/ folder. Now I need to read the mets.xml fully to find the issue mappings.
+
+Bash Check last filenames in mets.xml
+IN
+grep -o 'ns2:href="[^"]*"' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/mets.xml | tail -20
+
+OUT
+ns2:href="page/0116_p124.xml"
+ns2:href="page/0117_p125.xml"
+ns2:href="page/0118_p126.xml"
+ns2:href="page/0119_p127.xml"
+ns2:href="page/0120_p128.xml"
+ns2:href="page/0121_p129.xml"
+ns2:href="page/0122_p130.xml"
+ns2:href="page/0123_p131.xml"
+ns2:href="page/0124_p132.xml"
+ns2:href="page/0125_p133.xml"
+ns2:href="page/0126_p134.xml"
+ns2:href="page/0127_p135.xml"
+ns2:href="page/0128_heresies1_page-0001.xml"
+ns2:href="page/0129_heresies26_page-0002.xml"
+ns2:href="page/0130_heresies26_page-0001.xml"
+ns2:href="page/0131_heresies26_page-0003.xml"
+ns2:href="page/0132_heresies27_page-0001.xml"
+ns2:href="page/0133_heresies27_page-0002.xml"
+ns2:href="page/0134_heresies27_page-0003.xml"
+ns2:href="page/0135_heresies26_page-0004.xml"
+Bash Read metadata.xml for issue mapping info
+IN
+cat /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/metadata.xml | head -60
+
+OUT
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<trpDocMetadata>
+    <docId>11906961</docId>
+    <title>heresies_ground_truth</title>
+    <uploadTimestamp>1762178061165</uploadTimestamp>
+    <uploader>a12248219@unet.univie.ac.at</uploader>
+    <uploaderId>447621</uploaderId>
+    <nrOfPages>135</nrOfPages>
+    <pageId>105407233</pageId>
+    <url>https://files.transkribus.eu/Get?fileType=view&amp;id=JTAQOGEZWLSMDJGBOTNJMTNG</url>
+    <thumbUrl>https://files.transkribus.eu/Get?fileType=thumb&amp;id=JTAQOGEZWLSMDJGBOTNJMTNG</thumbUrl>
+    <status>0</status>
+    <fimgStoreColl>TrpDoc_DEA_11906961</fimgStoreColl>
+    <origDocId>0</origDocId>
+    <collectionList>
+        <colList>
+            <colId>2222244</colId>
+            <colName>heresies_training_dataset</colName>
+            <description>created by a12248219@unet.univie.ac.at</description>
+            <crowdsourcing>false</crowdsourcing>
+            <elearning>false</elearning>
+            <nrOfDocuments>0</nrOfDocuments>
+            <isFavorite>false</isFavorite>
+        </colList>
+    </collectionList>
+    <mainColId>2222244</mainColId>
+</trpDocMetadata>
+Let me look at the individual ground truth page XMLs to see if they contain source issue references.
+
+Bash Check TranskribusMetadata in first ground truth page
+IN
+grep 'TranskribusMetadata\|imageFilename\|docId' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/0001_p002.xml | head -5
+
+OUT
+        <TranskribusMetadata docId="11906961" pageId="105407233" pageNr="1" tsid="260922959" status="GT" userId="447621" imgUrl="https://files.transkribus.eu/Get?fileType=view&amp;id=JTAQOGEZWLSMDJGBOTNJMTNG" xmlUrl="https://files.transkribus.eu/Get?id=RQQNOPJQSXLCSLRLQRUDRKPD" imageId="88485270"/>
+    <Page imageFilename="0001_p002.jpg" imageWidth="2479" imageHeight="3508">
+Bash Check metadata in heresies1 page
+IN
+grep 'TranskribusMetadata\|imageFilename\|docId' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/0128_heresies1_page-0001.xml | head -5
+
+OUT
+        <TranskribusMetadata docId="11906961" pageId="107550416" pageNr="128" tsid="263954627" status="GT" userId="447621" imgUrl="https://files.transkribus.eu/Get?fileType=view&amp;id=VVRBVYNFFHSRYZZBXBXRNYAE" xmlUrl="https://files.transkribus.eu/Get?id=IMMEJTBRTCZMRJQSLSKAFQQB" imageId="90376620"/>
+    <Page imageFilename="0128_heresies1_page-0001.jpg" imageWidth="2550" imageHeight="3300">
+Bash Compare image dimensions between GT and source pages
+IN
+grep 'imageWidth\|imageHeight' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/0001_p002.xml && echo "---" && for i in 1 2 3; do echo "heresies_0${i}:"; grep 'imageWidth\|imageHeight' /Users/sophiehamann/master-thesis-code/data/raw/heresies_0${i}_pagexml/page_2.xml; done
+
+OUT
+    <Page imageFilename="0001_p002.jpg" imageWidth="2479" imageHeight="3508">
+---
+heresies_01:
+    <Page imageFilename="104611228.jpg" imageWidth="2479" imageHeight="3508">
+heresies_02:
+    <Page imageFilename="104590207.jpg" imageWidth="2479" imageHeight="3508">
+heresies_03:
+    <Page imageFilename="104590411.jpg" imageWidth="2479" imageHeight="3508">
+Let me try matching text content to identify which issue the first 127 pages come from.
+
+Bash Get text from first ground truth page
+IN
+grep -o '<Unicode>[^<]*</Unicode>' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/0001_p002.xml | head -5
+
+OUT
+<Unicode>30</Unicode>
+<Unicode></Unicode>
+<Unicode>The Art of Not Bowing: Writing by Women in Prison</Unicode>
+<Unicode></Unicode>
+<Unicode>Carol Muske</Unicode>
+Bash Get text from heresies1 page in ground truth
+IN
+grep -o '<Unicode>[^<]*</Unicode>' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/0128_heresies1_page-0001.xml | head -5
+
+OUT
+<Unicode>31</Unicode>
+<Unicode></Unicode>
+<Unicode>Personally</Unicode>
+<Unicode>So you spoke to me in silence</Unicode>
+<Unicode>in the ice man's chor</Unicode>
+Bash Search for matching text across all source XMLs
+IN
+grep -rl "The Art of Not Bowing" /Users/sophiehamann/master-thesis-code/data/raw/heresies_*_pagexml/ 2>/dev/null | head -5
+
+OUT
+/Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/page_32.xml
+Bash Get text from heresies_01 page 1
+IN
+grep -o '<Unicode>[^<]*</Unicode>' /Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/page_1.xml | head -5
+
+OUT
+<Unicode>HERESIES</Unicode>
+<Unicode>a Feminist Publication on art and Politics</Unicode>
+Bash Get text from heresies_01 page 32
+IN
+grep -o '<Unicode>[^<]*</Unicode>' /Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/page_32.xml | head -5
+
+OUT
+<Unicode>30</Unicode>
+<Unicode>The Art of Not Bowing: Writing by Women in Prison</Unicode>
+<Unicode>Carol Muske</Unicode>
+<Unicode>Who the hell am I anyway</Unicode>
+<Unicode>Not to bow?</Unicode>
+Bash Get text from second ground truth page
+IN
+grep -o '<Unicode>[^<]*</Unicode>' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/0002_p003.xml | head -3
+
+OUT
+<Unicode>49</Unicode>
+<Unicode></Unicode>
+<Unicode>cies becomes the Surrealistic version of the</Unicode>
+Bash Get text from last sequential ground truth page
+IN
+grep -o '<Unicode>[^<]*</Unicode>' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/0127_p135.xml | head -3
+
+OUT
+<Unicode>76</Unicode>
+<Unicode></Unicode>
+<Unicode>and theory and debating what might come next. Patricia</Unicode>
+Bash Find which source page matches ground truth page 0002
+IN
+grep -rl "cies becomes the Surrealistic version" /Users/sophiehamann/master-thesis-code/data/raw/heresies_*_pagexml/ 2>/dev/null
+
+OUT
+/Users/sophiehamann/master-thesis-code/data/raw/heresies_01_pagexml/page_51.xml
+Bash Find which source page matches ground truth page 0127
+IN
+grep -rl "and theory and debating what might come next. Patricia" /Users/sophiehamann/master-thesis-code/data/raw/heresies_*_pagexml/ 2>/dev/null
+
+OUT
+/Users/sophiehamann/master-thesis-code/data/raw/heresies_09_pagexml/page_78.xml
+Now I understand the full picture. Ground truth pages come from multiple issues — some are explicitly named (heresies1, heresies26, heresies27) and the first 127 need text-based matching. Let me check the project structure for where to put the script.
+
+Bash List project root directory
+IN
+ls /Users/sophiehamann/master-thesis-code/
+
+OUT
+data
+docs
+notebooks
+README.md
+requirements.txt
+src
+Bash Count pages in heresies_09 to verify page_78 exists
+IN
+ls /Users/sophiehamann/master-thesis-code/data/raw/heresies_09_pagexml/ | wc -l && ls /Users/sophiehamann/master-thesis-code/data/raw/heresies_09_pagexml/ | sort -V | tail -5
+
+OUT
+     100
+page_96.xml
+page_97.xml
+page_98.xml
+page_99.xml
+page_100.xml
+Bash List src directory
+IN
+ls /Users/sophiehamann/master-thesis-code/src/
+
+OUT
+training
+Now I have enough context to write the script. Here's the approach:
+
+For pages named 0128_heresies1_page-0001.xml etc.: parse issue + page number directly from the filename
+For pages named 0001_p002.xml etc.: extract unique text and match against all source XMLs
+I'll write a script that builds a text index of all source XMLs, then matches each ground truth page to its source.
+
+Write collect_ocr_pages_for_cer.py
+177 lines
+"""
+Collect source OCR page XMLs that correspond to the ground truth pages
+in the combined ground truth document, for CER calculation.
+
+Ground truth pages come from:
+- Pages named "0128_heresies1_page-0001.xml" etc.: directly maps to
+  heresies_01_pagexml/page_1.xml, heresies_26_pagexml/page_2.xml, etc.
+- Pages named "0001_p002.xml" etc.: matched by text content search across
+  all source heresies_XX_pagexml directories.
+"""
+
+import re
+import shutil
+from pathlib import Path
+from lxml import etree
+
+NAMESPACE = {"pc": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15"}
+
+GT_PAGE_DIR = Path(
+    "/Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page"
+)
+RAW_DIR = Path("/Users/sophiehamann/master-thesis-code/data/raw")
+OUTPUT_DIR = Path(
+    "/Users/sophiehamann/master-thesis-code/data/processed/training_data/ocr_pages_for_cer"
+)
+
+
+def extract_text_lines(xml_path: Path) -> list[str]:
+    """Extract all non-empty TextLine Unicode texts from a PAGE XML file."""
+    try:
+        tree = etree.parse(xml_path)
+        root = tree.getroot()
+        lines = []
+        for tl in root.findall(".//pc:TextLine", NAMESPACE):
+            u = tl.find("pc:TextEquiv/pc:Unicode", NAMESPACE)
+            if u is not None and u.text and u.text.strip():
+                lines.append(u.text.strip())
+        return lines
+    except Exception as e:
+        print(f"  WARNING: could not parse {xml_path}: {e}")
+        return []
+
+
+def build_source_index(raw_dir: Path) -> dict[str, tuple[Path, list[str]]]:
+    """
+    Build an index: {source_file_stem: (path, text_lines)} for all source XMLs.
+    Also build a quick lookup by text fingerprint.
+    Returns: dict mapping file stem to (path, lines).
+    """
+    index = {}
+    pagexml_dirs = sorted(raw_dir.glob("heresies_*_pagexml"))
+    print(f"Indexing {len(pagexml_dirs)} source directories...")
+    for d in pagexml_dirs:
+        for xml_file in sorted(d.glob("page_*.xml")):
+            lines = extract_text_lines(xml_file)
+            index[xml_file.stem + "|" + d.name] = (xml_file, lines)
+    print(f"Indexed {len(index)} source page XMLs.")
+    return index
+
+
+def make_text_fingerprint(lines: list[str], n: int = 3) -> list[str]:
+    """Return the longest n non-trivial text lines as a fingerprint."""
+    candidates = [l for l in lines if len(l) > 10]
+    candidates.sort(key=len, reverse=True)
+    return candidates[:n]
+
+
+def find_matching_source(
+    gt_lines: list[str],
+    source_index: dict[str, tuple[Path, list[str]]],
+) -> tuple[Path | None, int]:
+    """
+    Find the source XML that best matches the ground truth text lines.
+    Returns (matching_path, match_score) where score is number of matched lines.
+    """
+    fingerprint = make_text_fingerprint(gt_lines)
+    if not fingerprint:
+        return None, 0
+
+    best_path = None
+    best_score = 0
+
+    for key, (src_path, src_lines) in source_index.items():
+        src_text = " ".join(src_lines)
+        score = sum(1 for fp in fingerprint if fp in src_text)
+        if score > best_score:
+            best_score = score
+            best_path = src_path
+
+    return best_path, best_score
+
+
+def parse_explicit_filename(filename: str) -> tuple[str, int] | None:
+    """
+    Parse filenames like '0128_heresies1_page-0001.xml'.
+    Returns (issue_dir_name, page_number) or None.
+    """
+    m = re.match(r"\d+_heresies(\d+)_page-(\d+)\.xml", filename)
+    if m:
+        issue_num = int(m.group(1))
+        page_num = int(m.group(2))
+        issue_dir = f"heresies_{issue_num:02d}_pagexml"
+        return issue_dir, page_num
+    return None
+
+
+def main():
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    gt_pages = sorted(GT_PAGE_DIR.glob("*.xml"))
+    print(f"Found {len(gt_pages)} ground truth pages.\n")
+
+    # Build source index for text-based matching
+    source_index = build_source_index(RAW_DIR)
+    print()
+
+    matched = []
+    unmatched = []
+
+    for gt_page in gt_pages:
+        filename = gt_page.name
+
+        # --- Strategy 1: explicit issue+page in filename ---
+        parsed = parse_explicit_filename(filename)
+        if parsed:
+            issue_dir, page_num = parsed
+            src_path = RAW_DIR / issue_dir / f"page_{page_num}.xml"
+            if src_path.exists():
+                dest_name = f"{gt_page.stem}__{issue_dir}__page_{page_num}.xml"
+                shutil.copy2(src_path, OUTPUT_DIR / dest_name)
+                matched.append((filename, src_path))
+                print(f"[EXPLICIT] {filename} → {issue_dir}/page_{page_num}.xml")
+            else:
+                print(f"[MISSING]  {filename} → {src_path} (not found)")
+                unmatched.append(filename)
+            continue
+
+        # --- Strategy 2: text-based matching ---
+        gt_lines = extract_text_lines(gt_page)
+        if not gt_lines:
+            print(f"[EMPTY]    {filename} — no text, skipping")
+            unmatched.append(filename)
+            continue
+
+        src_path, score = find_matching_source(gt_lines, source_index)
+        if src_path and score >= 2:
+            issue_dir = src_path.parent.name
+            page_stem = src_path.stem
+            dest_name = f"{gt_page.stem}__{issue_dir}__{page_stem}.xml"
+            shutil.copy2(src_path, OUTPUT_DIR / dest_name)
+            matched.append((filename, src_path))
+            print(f"[MATCHED]  {filename} → {issue_dir}/{page_stem}.xml  (score={score})")
+        elif src_path and score == 1:
+            issue_dir = src_path.parent.name
+            page_stem = src_path.stem
+            dest_name = f"{gt_page.stem}__{issue_dir}__{page_stem}.xml"
+            shutil.copy2(src_path, OUTPUT_DIR / dest_name)
+            matched.append((filename, src_path))
+            print(f"[WEAK]     {filename} → {issue_dir}/{page_stem}.xml  (score={score}, low confidence)")
+        else:
+            print(f"[NO MATCH] {filename} — no source page found")
+            unmatched.append(filename)
+
+    print(f"\n{'='*60}")
+    print(f"Matched:   {len(matched)} / {len(gt_pages)}")
+    print(f"Unmatched: {len(unmatched)} / {len(gt_pages)}")
+    print(f"Output:    {OUTPUT_DIR}")
+
+    if unmatched:
+        print("\nUnmatched ground truth pages:")
+        for f in unmatched:
+            print(f"  {f}")
+
+
+if __name__ == "__main__":
+    main()
+Bash Run the matching script
+IN
+python src/collect_ocr_pages_for_cer.py 2>&1
+
+OUT
+Found 135 ground truth pages.
+
+Indexing 27 source directories...
+Indexed 2764 source page XMLs.
+
+[MATCHED]  0001_p002.xml → heresies_01_pagexml/page_32.xml  (score=3)
+[MATCHED]  0002_p003.xml → heresies_01_pagexml/page_51.xml  (score=3)
+[MATCHED]  0003_p004.xml → heresies_01_pagexml/page_63.xml  (score=3)
+[MATCHED]  0004_p005.xml → heresies_01_pagexml/page_89.xml  (score=2)
+[WEAK]     0005_p006.xml → heresies_10_pagexml/page_3.xml  (score=1, low confidence)
+[MATCHED]  0006_p007.xml → heresies_10_pagexml/page_33.xml  (score=2)
+[MATCHED]  0007_p008.xml → heresies_10_pagexml/page_61.xml  (score=3)
+[WEAK]     0008_p009.xml → heresies_10_pagexml/page_67.xml  (score=1, low confidence)
+[MATCHED]  0009_p010.xml → heresies_10_pagexml/page_85.xml  (score=3)
+[MATCHED]  0010_p011.xml → heresies_11_pagexml/page_20.xml  (score=2)
+[MATCHED]  0011_p012.xml → heresies_11_pagexml/page_21.xml  (score=2)
+[MATCHED]  0012_p013.xml → heresies_11_pagexml/page_28.xml  (score=3)
+[WEAK]     0013_p014.xml → heresies_11_pagexml/page_35.xml  (score=1, low confidence)
+[WEAK]     0014_p015.xml → heresies_11_pagexml/page_53.xml  (score=1, low confidence)
+[MATCHED]  0015_p016.xml → heresies_12_pagexml/page_15.xml  (score=3)
+[MATCHED]  0016_p017.xml → heresies_12_pagexml/page_19.xml  (score=3)
+[MATCHED]  0017_p018.xml → heresies_12_pagexml/page_46.xml  (score=3)
+[MATCHED]  0018_p019.xml → heresies_12_pagexml/page_50.xml  (score=2)
+[MATCHED]  0019_p020.xml → heresies_12_pagexml/page_72.xml  (score=2)
+[MATCHED]  0020_p021.xml → heresies_13_pagexml/page_9.xml  (score=3)
+[MATCHED]  0021_p022.xml → heresies_13_pagexml/page_17.xml  (score=3)
+[WEAK]     0022_p023.xml → heresies_13_pagexml/page_31.xml  (score=1, low confidence)
+[WEAK]     0023_p024.xml → heresies_13_pagexml/page_60.xml  (score=1, low confidence)
+[MATCHED]  0024_p025.xml → heresies_13_pagexml/page_84.xml  (score=2)
+[WEAK]     0025_p026.xml → heresies_14_pagexml/page_3.xml  (score=1, low confidence)
+[NO MATCH] 0026_p027.xml — no source page found
+[NO MATCH] 0027_p028.xml — no source page found
+[MATCHED]  0028_p029.xml → heresies_14_pagexml/page_29.xml  (score=3)
+[MATCHED]  0029_p030.xml → heresies_14_pagexml/page_40.xml  (score=2)
+[NO MATCH] 0030_p031.xml — no source page found
+[MATCHED]  0031_p032.xml → heresies_15_pagexml/page_32.xml  (score=3)
+[MATCHED]  0032_p033.xml → heresies_15_pagexml/page_38.xml  (score=3)
+[MATCHED]  0033_p034.xml → heresies_15_pagexml/page_58.xml  (score=2)
+[WEAK]     0034_p035.xml → heresies_15_pagexml/page_64.xml  (score=1, low confidence)
+[MATCHED]  0035_p036.xml → heresies_16_pagexml/page_87.xml  (score=3)
+[MATCHED]  0036_p037.xml → heresies_16_pagexml/page_89.xml  (score=3)
+[MATCHED]  0037_p038.xml → heresies_16_pagexml/page_90.xml  (score=3)
+[MATCHED]  0038_p039.xml → heresies_16_pagexml/page_91.xml  (score=3)
+[MATCHED]  0039_p040.xml → heresies_16_pagexml/page_97.xml  (score=3)
+[MATCHED]  0040_p041.xml → heresies_17_pagexml/page_15.xml  (score=3)
+[MATCHED]  0041_p042.xml → heresies_17_pagexml/page_18.xml  (score=3)
+[MATCHED]  0042_p043.xml → heresies_17_pagexml/page_20.xml  (score=3)
+[MATCHED]  0043_p044.xml → heresies_17_pagexml/page_29.xml  (score=2)
+[WEAK]     0044_p045.xml → heresies_17_pagexml/page_82.xml  (score=1, low confidence)
+[WEAK]     0045_p046.xml → heresies_18_pagexml/page_1.xml  (score=1, low confidence)
+[MATCHED]  0046_p047.xml → heresies_18_pagexml/page_29.xml  (score=2)
+[MATCHED]  0047_p048.xml → heresies_18_pagexml/page_57.xml  (score=3)
+[MATCHED]  0048_p049.xml → heresies_18_pagexml/page_78.xml  (score=3)
+[MATCHED]  0049_p050.xml → heresies_18_pagexml/page_94.xml  (score=2)
+[MATCHED]  0050_p051.xml → heresies_19_pagexml/page_6.xml  (score=3)
+[MATCHED]  0051_p052.xml → heresies_19_pagexml/page_8.xml  (score=3)
+[MATCHED]  0052_p053.xml → heresies_19_pagexml/page_12.xml  (score=2)
+[MATCHED]  0053_p054.xml → heresies_19_pagexml/page_15.xml  (score=3)
+[MATCHED]  0054_p055.xml → heresies_19_pagexml/page_30.xml  (score=2)
+[MATCHED]  0055_p056.xml → heresies_02_pagexml/page_4.xml  (score=3)
+[NO MATCH] 0056_p057.xml — no source page found
+[MATCHED]  0057_p058.xml → heresies_02_pagexml/page_115.xml  (score=3)
+[MATCHED]  0058_p059.xml → heresies_02_pagexml/page_118.xml  (score=2)
+[MATCHED]  0059_p060.xml → heresies_02_pagexml/page_120.xml  (score=3)
+[MATCHED]  0060_p061.xml → heresies_18_pagexml/page_2.xml  (score=3)
+[MATCHED]  0061_p062.xml → heresies_20_pagexml/page_7.xml  (score=3)
+[WEAK]     0062_p063.xml → heresies_20_pagexml/page_11.xml  (score=1, low confidence)
+[MATCHED]  0063_p064.xml → heresies_20_pagexml/page_65.xml  (score=3)
+[WEAK]     0064_p065.xml → heresies_20_pagexml/page_73.xml  (score=1, low confidence)
+[MATCHED]  0065_p066.xml → heresies_21_pagexml/page_5.xml  (score=3)
+[MATCHED]  0066_p067.xml → heresies_21_pagexml/page_14.xml  (score=3)
+[MATCHED]  0067_p068.xml → heresies_21_pagexml/page_21.xml  (score=2)
+[MATCHED]  0068_p069.xml → heresies_21_pagexml/page_61.xml  (score=3)
+[MATCHED]  0069_p070.xml → heresies_21_pagexml/page_65.xml  (score=3)
+[MATCHED]  0070_p071.xml → heresies_22_pagexml/page_23.xml  (score=3)
+[WEAK]     0071_p072.xml → heresies_22_pagexml/page_26.xml  (score=1, low confidence)
+[MATCHED]  0072_p073.xml → heresies_22_pagexml/page_29.xml  (score=3)
+[MATCHED]  0073_p074.xml → heresies_22_pagexml/page_81.xml  (score=2)
+[MATCHED]  0074_p075.xml → heresies_22_pagexml/page_94.xml  (score=3)
+[MATCHED]  0075_p076.xml → heresies_23_pagexml/page_18.xml  (score=2)
+[NO MATCH] 0076_p077.xml — no source page found
+[WEAK]     0077_p078.xml → heresies_23_pagexml/page_37.xml  (score=1, low confidence)
+[MATCHED]  0078_p079.xml → heresies_23_pagexml/page_57.xml  (score=3)
+[MATCHED]  0079_p080.xml → heresies_23_pagexml/page_97.xml  (score=2)
+[MATCHED]  0080_p081.xml → heresies_24_pagexml/page_2.xml  (score=2)
+[WEAK]     0081_p082.xml → heresies_24_pagexml/page_6.xml  (score=1, low confidence)
+[MATCHED]  0082_p083.xml → heresies_24_pagexml/page_14.xml  (score=3)
+[NO MATCH] 0083_p084.xml — no source page found
+[MATCHED]  0084_p085.xml → heresies_24_pagexml/page_41.xml  (score=3)
+[MATCHED]  0085_p086.xml → heresies_25_pagexml/page_9.xml  (score=3)
+[NO MATCH] 0086_p087.xml — no source page found
+[MATCHED]  0087_p088.xml → heresies_25_pagexml/page_14.xml  (score=2)
+[WEAK]     0088_p089.xml → heresies_25_pagexml/page_42.xml  (score=1, low confidence)
+[MATCHED]  0089_p090.xml → heresies_25_pagexml/page_79.xml  (score=3)
+[NO MATCH] 0090_p095.xml — no source page found
+[MATCHED]  0091_p099.xml → heresies_27_pagexml/page_107.xml  (score=2)
+[MATCHED]  0092_p100.xml → heresies_27_pagexml/page_112.xml  (score=3)
+[MATCHED]  0093_p101.xml → heresies_03_pagexml/page_6.xml  (score=3)
+[MATCHED]  0094_p102.xml → heresies_03_pagexml/page_21.xml  (score=3)
+[MATCHED]  0095_p103.xml → heresies_03_pagexml/page_30.xml  (score=3)
+[MATCHED]  0096_p104.xml → heresies_03_pagexml/page_38.xml  (score=3)
+[MATCHED]  0097_p105.xml → heresies_03_pagexml/page_106.xml  (score=3)
+[MATCHED]  0098_p106.xml → heresies_04_pagexml/page_58.xml  (score=3)
+[MATCHED]  0099_p107.xml → heresies_04_pagexml/page_70.xml  (score=3)
+[MATCHED]  0100_p108.xml → heresies_04_pagexml/page_82.xml  (score=2)
+[MATCHED]  0101_p109.xml → heresies_04_pagexml/page_101.xml  (score=2)
+[MATCHED]  0102_p110.xml → heresies_04_pagexml/page_105.xml  (score=3)
+[MATCHED]  0103_p111.xml → heresies_05_pagexml/page_39.xml  (score=3)
+[MATCHED]  0104_p112.xml → heresies_05_pagexml/page_56.xml  (score=3)
+[MATCHED]  0105_p113.xml → heresies_05_pagexml/page_74.xml  (score=2)
+[MATCHED]  0106_p114.xml → heresies_05_pagexml/page_105.xml  (score=3)
+[MATCHED]  0107_p115.xml → heresies_05_pagexml/page_114.xml  (score=3)
+[MATCHED]  0108_p116.xml → heresies_06_pagexml/page_52.xml  (score=2)
+[MATCHED]  0109_p117.xml → heresies_06_pagexml/page_73.xml  (score=3)
+[MATCHED]  0110_p118.xml → heresies_06_pagexml/page_102.xml  (score=3)
+[NO MATCH] 0111_p119.xml — no source page found
+[MATCHED]  0112_p120.xml → heresies_06_pagexml/page_130.xml  (score=3)
+[MATCHED]  0113_p121.xml → heresies_07_pagexml/page_8.xml  (score=2)
+[MATCHED]  0114_p122.xml → heresies_07_pagexml/page_23.xml  (score=2)
+[MATCHED]  0115_p123.xml → heresies_07_pagexml/page_24.xml  (score=3)
+[MATCHED]  0116_p124.xml → heresies_07_pagexml/page_111.xml  (score=3)
+[MATCHED]  0117_p125.xml → heresies_07_pagexml/page_123.xml  (score=3)
+[MATCHED]  0118_p126.xml → heresies_08_pagexml/page_2.xml  (score=3)
+[MATCHED]  0119_p127.xml → heresies_08_pagexml/page_8.xml  (score=3)
+[MATCHED]  0120_p128.xml → heresies_08_pagexml/page_104.xml  (score=3)
+[MATCHED]  0121_p129.xml → heresies_08_pagexml/page_125.xml  (score=3)
+[MATCHED]  0122_p130.xml → heresies_08_pagexml/page_127.xml  (score=3)
+[NO MATCH] 0123_p131.xml — no source page found
+[NO MATCH] 0124_p132.xml — no source page found
+[MATCHED]  0125_p133.xml → heresies_09_pagexml/page_48.xml  (score=3)
+[MATCHED]  0126_p134.xml → heresies_09_pagexml/page_72.xml  (score=3)
+[MATCHED]  0127_p135.xml → heresies_09_pagexml/page_78.xml  (score=3)
+[EXPLICIT] 0128_heresies1_page-0001.xml → heresies_01_pagexml/page_1.xml
+[EXPLICIT] 0129_heresies26_page-0002.xml → heresies_26_pagexml/page_2.xml
+[EXPLICIT] 0130_heresies26_page-0001.xml → heresies_26_pagexml/page_1.xml
+[EXPLICIT] 0131_heresies26_page-0003.xml → heresies_26_pagexml/page_3.xml
+[EXPLICIT] 0132_heresies27_page-0001.xml → heresies_27_pagexml/page_1.xml
+[EXPLICIT] 0133_heresies27_page-0002.xml → heresies_27_pagexml/page_2.xml
+[EXPLICIT] 0134_heresies27_page-0003.xml → heresies_27_pagexml/page_3.xml
+[EXPLICIT] 0135_heresies26_page-0004.xml → heresies_26_pagexml/page_4.xml
+
+============================================================
+Matched:   124 / 135
+Unmatched: 11 / 135
+Output:    /Users/sophiehamann/master-thesis-code/data/processed/training_data/ocr_pages_for_cer
+
+Unmatched ground truth pages:
+  0026_p027.xml
+  0027_p028.xml
+  0030_p031.xml
+  0056_p057.xml
+  0076_p077.xml
+  0083_p084.xml
+  0086_p087.xml
+  0090_p095.xml
+  0111_p119.xml
+  0123_p131.xml
+  0124_p132.xml
+124/135 matched. Let me investigate the 11 unmatched pages to find them manually.
+
+Bash Get text from all unmatched ground truth pages
+IN
+for f in 0026_p027 0027_p028 0030_p031 0056_p057 0076_p077 0083_p084 0086_p087 0090_p095 0111_p119 0123_p131 0124_p132; do
+  echo "=== $f ==="
+  grep -o '<Unicode>[^<]*</Unicode>' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/${f}.xml | head -4
+done
+
+OUT
+=== 0026_p027 ===
+<Unicode>9</Unicode>
+<Unicode></Unicode>
+=== 0027_p028 ===
+<Unicode>22</Unicode>
+<Unicode></Unicode>
+=== 0030_p031 ===
+<Unicode>25</Unicode>
+<Unicode></Unicode>
+<Unicode>WORKPLACE</Unicode>
+<Unicode></Unicode>
+=== 0056_p057 ===
+<Unicode>69</Unicode>
+<Unicode></Unicode>
+<Unicode>25</Unicode>
+<Unicode></Unicode>
+=== 0076_p077 ===
+<Unicode>30</Unicode>
+<Unicode></Unicode>
+<Unicode>reckoning time at a reckless speed. All my features will slide off</Unicode>
+<Unicode>my face. My chin will rest on my chest. My eyes will become reac-</Unicode>
+=== 0083_p084 ===
+<Unicode>expression in art (and life and politics)</Unicode>
+<Unicode>of a positive role for women are still</Unicode>
+<Unicode>paramount concerns. Beyond that, femi¬</Unicode>
+<Unicode>nist artists must continue to seek new</Unicode>
+=== 0086_p087 ===
+<Unicode>Judy Malloy No Potato Chips, 1989, pen and ink.</Unicode>
+<Unicode></Unicode>
+<Unicode>Judy Malloy is an artist and writer who lives in California. In her experimental book, she uses information - found and</Unicode>
+<Unicode>imagined - to describes the world in which she lives. She is currently working on The Other Shoe, a narrabase (narrative</Unicode>
+=== 0090_p095 ===
+<Unicode>SUBSCRIBING</Unicode>
+<Unicode>TO OUR</Unicode>
+<Unicode>PRINCIPLES</Unicode>
+<Unicode>ISN´T </Unicode>
+=== 0111_p119 ===
+<Unicode>124</Unicode>
+<Unicode></Unicode>
+<Unicode>Contributors cont.</Unicode>
+<Unicode></Unicode>
+=== 0123_p131 ===
+<Unicode>ORGANIZED</Unicode>
+<Unicode>WOMEN</Unicode>
+<Unicode>DIVIDED</Unicode>
+<Unicode></Unicode>
+=== 0124_p132 ===
+<Unicode>13</Unicode>
+<Unicode></Unicode>
+<Unicode>images do not deny or ignore the inter-</Unicode>
+<Unicode>nal and external contradictions involv-</Unicode>
+Bash Search for unmatched page text in source XMLs
+IN
+grep -rl "reckoning time at a reckless speed" /Users/sophiehamann/master-thesis-code/data/raw/heresies_*_pagexml/ 2>/dev/null
+grep -rl "expression in art (and life and politics)" /Users/sophiehamann/master-thesis-code/data/raw/heresies_*_pagexml/ 2>/dev/null
+grep -rl "Judy Malloy" /Users/sophiehamann/master-thesis-code/data/raw/heresies_*_pagexml/ 2>/dev/null
+grep -rl "SUBSCRIBING" /Users/sophiehamann/master-thesis-code/data/raw/heresies_*_pagexml/ 2>/dev/null
+
+OUT
+/Users/sophiehamann/master-thesis-code/data/raw/heresies_23_pagexml/page_32.xml
+/Users/sophiehamann/master-thesis-code/data/raw/heresies_24_pagexml/page_15.xml
+/Users/sophiehamann/master-thesis-code/data/raw/heresies_24_pagexml/page_29.xml
+/Users/sophiehamann/master-thesis-code/data/raw/heresies_25_pagexml/page_13.xml
+Several unmatched pages have findable text. Let me check why the script missed them and then fix it with improved partial matching.
+
+Bash Debug why 0076_p077 was not matched
+IN
+python3 -c "
+from lxml import etree
+NAMESPACE = {'pc': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'}
+def extract_text_lines(xml_path):
+    tree = etree.parse(xml_path)
+    root = tree.getroot()
+    lines = []
+    for tl in root.findall('.//pc:TextLine', NAMESPACE):
+        u = tl.find('pc:TextEquiv/pc:Unicode', NAMESPACE)
+        if u is not None and u.text and u.text.strip():
+            lines.append(u.text.strip())
+    return lines
+
+gt = extract_text_lines('/Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/0076_p077.xml')
+src = extract_text_lines('/Users/sophiehamann/master-thesis-code/data/raw/heresies_23_pagexml/page_32.xml')
+print('GT lines:', gt[:5])
+print('SRC lines:', src[:5])
+print()
+fp = sorted([l for l in gt if len(l)>10], key=len, reverse=True)[:3]
+print('fingerprint:', fp)
+print('found in src?', [f in ' '.join(src) for f in fp])
+"
+
+OUT
+GT lines: ['30', 'reckoning time at a reckless speed. All my features will slide off', 'my face. My chin will rest on my chest. My eyes will become reac-', 'quainted with my toes. My breasts and belly will be one hump.', 'And my mother, who has been the young woman of my baby-']
+SRC lines: ['30', 'reckoning time at a reckless speed. All my features will slide off', 'my face. My chin will rest on my chest. My eyes will become reac-', 'quainted with my toes. My breasts and belly will be one hump.', 'And my mother, who has been the young woman of my baby-']
+
+fingerprint: ['e. m. broner has written five books and is on her sixth, the repair shop, she is the', 'recipient of an nea grant, and is guest writer at sarah laurence college.', 'oiled body, the bikiini, the muscled athlete. It is surrealistic and']
+found in src? [False, False, False]
+The fingerprint was picking the wrong lines (longest but most likely to have OCR errors). I need to fix the matching logic to use more representative lines.
+
+Edit collect_ocr_pages_for_cer.py
+Added 24 lines
+Also update the threshold logic for the new scoring:
+
+Edit collect_ocr_pages_for_cer.py
+Removed 6 lines
+Bash Re-run with improved matching algorithm
+IN
+rm -rf /Users/sophiehamann/master-thesis-code/data/processed/training_data/ocr_pages_for_cer && python src/collect_ocr_pages_for_cer.py 2>&1
+
+OUT
+Found 135 ground truth pages.
+
+Indexing 27 source directories...
+Indexed 2764 source page XMLs.
+
+[MATCHED]  0001_p002.xml → heresies_01_pagexml/page_32.xml  (score=1069.1)
+[MATCHED]  0002_p003.xml → heresies_01_pagexml/page_51.xml  (score=1008.5)
+[MATCHED]  0003_p004.xml → heresies_01_pagexml/page_63.xml  (score=928.7)
+[MATCHED]  0004_p005.xml → heresies_01_pagexml/page_89.xml  (score=222.5)
+[MATCHED]  0005_p006.xml → heresies_10_pagexml/page_3.xml  (score=104.1)
+[MATCHED]  0006_p007.xml → heresies_10_pagexml/page_33.xml  (score=1098.0)
+[MATCHED]  0007_p008.xml → heresies_10_pagexml/page_61.xml  (score=996.2)
+[MATCHED]  0008_p009.xml → heresies_10_pagexml/page_67.xml  (score=978.4)
+[MATCHED]  0009_p010.xml → heresies_10_pagexml/page_85.xml  (score=803.6)
+[MATCHED]  0010_p011.xml → heresies_11_pagexml/page_20.xml  (score=1668.9)
+[MATCHED]  0011_p012.xml → heresies_11_pagexml/page_21.xml  (score=656.0)
+[MATCHED]  0012_p013.xml → heresies_11_pagexml/page_28.xml  (score=1348.9)
+[MATCHED]  0013_p014.xml → heresies_11_pagexml/page_35.xml  (score=805.5)
+[MATCHED]  0014_p015.xml → heresies_11_pagexml/page_53.xml  (score=1538.9)
+[MATCHED]  0015_p016.xml → heresies_12_pagexml/page_15.xml  (score=1238.6)
+[MATCHED]  0016_p017.xml → heresies_12_pagexml/page_19.xml  (score=685.9)
+[MATCHED]  0017_p018.xml → heresies_12_pagexml/page_46.xml  (score=1168.3)
+[MATCHED]  0018_p019.xml → heresies_12_pagexml/page_50.xml  (score=1254.6)
+[MATCHED]  0019_p020.xml → heresies_12_pagexml/page_72.xml  (score=1648.1)
+[MATCHED]  0020_p021.xml → heresies_13_pagexml/page_9.xml  (score=528.3)
+[MATCHED]  0021_p022.xml → heresies_13_pagexml/page_17.xml  (score=969.7)
+[MATCHED]  0022_p023.xml → heresies_13_pagexml/page_31.xml  (score=110.0)
+[MATCHED]  0023_p024.xml → heresies_13_pagexml/page_60.xml  (score=1026.6)
+[MATCHED]  0024_p025.xml → heresies_13_pagexml/page_84.xml  (score=1199.7)
+[MATCHED]  0025_p026.xml → heresies_14_pagexml/page_3.xml  (score=974.1)
+[NO MATCH] 0026_p027.xml — best score=0.0, no confident source found
+[NO MATCH] 0027_p028.xml — best score=0.0, no confident source found
+[MATCHED]  0028_p029.xml → heresies_14_pagexml/page_29.xml  (score=355.1)
+[MATCHED]  0029_p030.xml → heresies_14_pagexml/page_40.xml  (score=130.0)
+[MATCHED]  0030_p031.xml → heresies_15_pagexml/page_27.xml  (score=1175.2)
+[MATCHED]  0031_p032.xml → heresies_15_pagexml/page_32.xml  (score=864.4)
+[MATCHED]  0032_p033.xml → heresies_15_pagexml/page_38.xml  (score=1606.5)
+[MATCHED]  0033_p034.xml → heresies_15_pagexml/page_58.xml  (score=1296.4)
+[MATCHED]  0034_p035.xml → heresies_15_pagexml/page_64.xml  (score=662.9)
+[MATCHED]  0035_p036.xml → heresies_16_pagexml/page_87.xml  (score=1329.3)
+[MATCHED]  0036_p037.xml → heresies_16_pagexml/page_89.xml  (score=2027.8)
+[MATCHED]  0037_p038.xml → heresies_16_pagexml/page_90.xml  (score=789.1)
+[MATCHED]  0038_p039.xml → heresies_16_pagexml/page_91.xml  (score=969.3)
+[MATCHED]  0039_p040.xml → heresies_16_pagexml/page_97.xml  (score=1338.6)
+[MATCHED]  0040_p041.xml → heresies_17_pagexml/page_15.xml  (score=597.7)
+[MATCHED]  0041_p042.xml → heresies_17_pagexml/page_18.xml  (score=1249.3)
+[MATCHED]  0042_p043.xml → heresies_17_pagexml/page_20.xml  (score=1057.9)
+[MATCHED]  0043_p044.xml → heresies_17_pagexml/page_29.xml  (score=288.1)
+[MATCHED]  0044_p045.xml → heresies_17_pagexml/page_82.xml  (score=350.3)
+[MATCHED]  0045_p046.xml → heresies_18_pagexml/page_1.xml  (score=110.0)
+[MATCHED]  0046_p047.xml → heresies_18_pagexml/page_29.xml  (score=707.0)
+[MATCHED]  0047_p048.xml → heresies_18_pagexml/page_57.xml  (score=1368.3)
+[MATCHED]  0048_p049.xml → heresies_18_pagexml/page_78.xml  (score=1496.1)
+[MATCHED]  0049_p050.xml → heresies_18_pagexml/page_94.xml  (score=107.5)
+[MATCHED]  0050_p051.xml → heresies_19_pagexml/page_6.xml  (score=708.7)
+[MATCHED]  0051_p052.xml → heresies_19_pagexml/page_8.xml  (score=1809.4)
+[MATCHED]  0052_p053.xml → heresies_19_pagexml/page_12.xml  (score=425.8)
+[MATCHED]  0053_p054.xml → heresies_19_pagexml/page_15.xml  (score=590.0)
+[MATCHED]  0054_p055.xml → heresies_19_pagexml/page_30.xml  (score=93.3)
+[MATCHED]  0055_p056.xml → heresies_02_pagexml/page_4.xml  (score=1109.7)
+[NO MATCH] 0056_p057.xml — best score=0.0, no confident source found
+[MATCHED]  0057_p058.xml → heresies_02_pagexml/page_115.xml  (score=639.0)
+[MATCHED]  0058_p059.xml → heresies_02_pagexml/page_118.xml  (score=628.9)
+[MATCHED]  0059_p060.xml → heresies_02_pagexml/page_120.xml  (score=416.9)
+[MATCHED]  0060_p061.xml → heresies_20_pagexml/page_2.xml  (score=986.1)
+[MATCHED]  0061_p062.xml → heresies_20_pagexml/page_7.xml  (score=977.1)
+[MATCHED]  0062_p063.xml → heresies_20_pagexml/page_11.xml  (score=1198.5)
+[MATCHED]  0063_p064.xml → heresies_20_pagexml/page_65.xml  (score=626.8)
+[MATCHED]  0064_p065.xml → heresies_20_pagexml/page_73.xml  (score=434.8)
+[MATCHED]  0065_p066.xml → heresies_21_pagexml/page_5.xml  (score=1138.3)
+[MATCHED]  0066_p067.xml → heresies_21_pagexml/page_14.xml  (score=1207.9)
+[MATCHED]  0067_p068.xml → heresies_21_pagexml/page_21.xml  (score=705.3)
+[MATCHED]  0068_p069.xml → heresies_21_pagexml/page_61.xml  (score=1435.3)
+[MATCHED]  0069_p070.xml → heresies_21_pagexml/page_65.xml  (score=956.3)
+[MATCHED]  0070_p071.xml → heresies_22_pagexml/page_23.xml  (score=606.8)
+[MATCHED]  0071_p072.xml → heresies_22_pagexml/page_26.xml  (score=876.8)
+[MATCHED]  0072_p073.xml → heresies_22_pagexml/page_29.xml  (score=1539.1)
+[MATCHED]  0073_p074.xml → heresies_22_pagexml/page_81.xml  (score=1498.9)
+[MATCHED]  0074_p075.xml → heresies_22_pagexml/page_94.xml  (score=1038.5)
+[MATCHED]  0075_p076.xml → heresies_23_pagexml/page_18.xml  (score=647.1)
+[MATCHED]  0076_p077.xml → heresies_23_pagexml/page_32.xml  (score=556.9)
+[MATCHED]  0077_p078.xml → heresies_23_pagexml/page_37.xml  (score=293.0)
+[MATCHED]  0078_p079.xml → heresies_23_pagexml/page_57.xml  (score=391.3)
+[MATCHED]  0079_p080.xml → heresies_23_pagexml/page_97.xml  (score=414.1)
+[MATCHED]  0080_p081.xml → heresies_24_pagexml/page_2.xml  (score=566.2)
+[MATCHED]  0081_p082.xml → heresies_24_pagexml/page_7.xml  (score=110.0)
+[MATCHED]  0082_p083.xml → heresies_24_pagexml/page_14.xml  (score=670.0)
+[MATCHED]  0083_p084.xml → heresies_24_pagexml/page_15.xml  (score=399.2)
+[MATCHED]  0084_p085.xml → heresies_24_pagexml/page_41.xml  (score=1268.2)
+[MATCHED]  0085_p086.xml → heresies_25_pagexml/page_9.xml  (score=608.0)
+[MATCHED]  0086_p087.xml → heresies_25_pagexml/page_13.xml  (score=102.3)
+[MATCHED]  0087_p088.xml → heresies_25_pagexml/page_14.xml  (score=958.5)
+[MATCHED]  0088_p089.xml → heresies_25_pagexml/page_42.xml  (score=717.2)
+[MATCHED]  0089_p090.xml → heresies_25_pagexml/page_79.xml  (score=297.5)
+[WEAK   ]  0090_p095.xml → heresies_08_pagexml/page_3.xml  (score=39.1)
+[MATCHED]  0091_p099.xml → heresies_27_pagexml/page_107.xml  (score=506.2)
+[MATCHED]  0092_p100.xml → heresies_27_pagexml/page_112.xml  (score=558.8)
+[MATCHED]  0093_p101.xml → heresies_03_pagexml/page_6.xml  (score=1349.7)
+[MATCHED]  0094_p102.xml → heresies_03_pagexml/page_21.xml  (score=898.7)
+[MATCHED]  0095_p103.xml → heresies_03_pagexml/page_30.xml  (score=1089.4)
+[MATCHED]  0096_p104.xml → heresies_03_pagexml/page_38.xml  (score=1299.7)
+[MATCHED]  0097_p105.xml → heresies_03_pagexml/page_106.xml  (score=160.0)
+[MATCHED]  0098_p106.xml → heresies_04_pagexml/page_58.xml  (score=1219.0)
+[MATCHED]  0099_p107.xml → heresies_04_pagexml/page_70.xml  (score=539.1)
+[MATCHED]  0100_p108.xml → heresies_04_pagexml/page_82.xml  (score=749.1)
+[MATCHED]  0101_p109.xml → heresies_04_pagexml/page_101.xml  (score=1808.7)
+[MATCHED]  0102_p110.xml → heresies_04_pagexml/page_105.xml  (score=190.0)
+[MATCHED]  0103_p111.xml → heresies_05_pagexml/page_39.xml  (score=1199.2)
+[MATCHED]  0104_p112.xml → heresies_05_pagexml/page_56.xml  (score=478.9)
+[MATCHED]  0105_p113.xml → heresies_05_pagexml/page_74.xml  (score=936.5)
+[MATCHED]  0106_p114.xml → heresies_05_pagexml/page_105.xml  (score=1268.2)
+[MATCHED]  0107_p115.xml → heresies_05_pagexml/page_114.xml  (score=1039.1)
+[MATCHED]  0108_p116.xml → heresies_06_pagexml/page_52.xml  (score=968.4)
+[MATCHED]  0109_p117.xml → heresies_06_pagexml/page_73.xml  (score=1899.7)
+[MATCHED]  0110_p118.xml → heresies_06_pagexml/page_102.xml  (score=1609.3)
+[MATCHED]  0111_p119.xml → heresies_06_pagexml/page_126.xml  (score=1204.0)
+[MATCHED]  0112_p120.xml → heresies_06_pagexml/page_130.xml  (score=1149.6)
+[MATCHED]  0113_p121.xml → heresies_07_pagexml/page_8.xml  (score=488.9)
+[MATCHED]  0114_p122.xml → heresies_07_pagexml/page_23.xml  (score=400.0)
+[MATCHED]  0115_p123.xml → heresies_07_pagexml/page_24.xml  (score=590.0)
+[MATCHED]  0116_p124.xml → heresies_07_pagexml/page_111.xml  (score=1127.6)
+[MATCHED]  0117_p125.xml → heresies_07_pagexml/page_123.xml  (score=1097.1)
+[MATCHED]  0118_p126.xml → heresies_08_pagexml/page_2.xml  (score=647.8)
+[MATCHED]  0119_p127.xml → heresies_08_pagexml/page_8.xml  (score=1066.6)
+[MATCHED]  0120_p128.xml → heresies_08_pagexml/page_104.xml  (score=1129.4)
+[MATCHED]  0121_p129.xml → heresies_08_pagexml/page_125.xml  (score=548.3)
+[MATCHED]  0122_p130.xml → heresies_08_pagexml/page_127.xml  (score=839.4)
+[MATCHED]  0123_p131.xml → heresies_09_pagexml/page_1.xml  (score=110.0)
+[MATCHED]  0124_p132.xml → heresies_09_pagexml/page_15.xml  (score=1748.8)
+[MATCHED]  0125_p133.xml → heresies_09_pagexml/page_48.xml  (score=935.5)
+[MATCHED]  0126_p134.xml → heresies_09_pagexml/page_72.xml  (score=1028.6)
+[MATCHED]  0127_p135.xml → heresies_09_pagexml/page_78.xml  (score=1388.8)
+[EXPLICIT] 0128_heresies1_page-0001.xml → heresies_01_pagexml/page_1.xml
+[EXPLICIT] 0129_heresies26_page-0002.xml → heresies_26_pagexml/page_2.xml
+[EXPLICIT] 0130_heresies26_page-0001.xml → heresies_26_pagexml/page_1.xml
+[EXPLICIT] 0131_heresies26_page-0003.xml → heresies_26_pagexml/page_3.xml
+[EXPLICIT] 0132_heresies27_page-0001.xml → heresies_27_pagexml/page_1.xml
+[EXPLICIT] 0133_heresies27_page-0002.xml → heresies_27_pagexml/page_2.xml
+[EXPLICIT] 0134_heresies27_page-0003.xml → heresies_27_pagexml/page_3.xml
+[EXPLICIT] 0135_heresies26_page-0004.xml → heresies_26_pagexml/page_4.xml
+
+============================================================
+Matched:   132 / 135
+Unmatched: 3 / 135
+Output:    /Users/sophiehamann/master-thesis-code/data/processed/training_data/ocr_pages_for_cer
+
+Unmatched ground truth pages:
+  0026_p027.xml
+  0027_p028.xml
+  0056_p057.xml
+132/135 matched now. Let me look at the 3 remaining unmatched pages — they are nearly empty image pages. Also verify the one WEAK match.
+
+Bash Show full text of unmatched pages
+IN
+for f in 0026_p027 0027_p028 0056_p057; do
+  echo "=== $f ==="
+  grep -o '<Unicode>[^<]*</Unicode>' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/${f}.xml
+done
+
+OUT
+=== 0026_p027 ===
+<Unicode>9</Unicode>
+<Unicode></Unicode>
+=== 0027_p028 ===
+<Unicode>22</Unicode>
+<Unicode></Unicode>
+=== 0056_p057 ===
+<Unicode>69</Unicode>
+<Unicode></Unicode>
+<Unicode>25</Unicode>
+<Unicode></Unicode>
+<Unicode>26</Unicode>
+<Unicode></Unicode>
+Bash Show full text of weak-matched page
+IN
+grep -o '<Unicode>[^<]*</Unicode>' /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page/0090_p095.xml
+
+OUT
+<Unicode>SUBSCRIBING</Unicode>
+<Unicode>TO OUR</Unicode>
+<Unicode>PRINCIPLES</Unicode>
+<Unicode>ISN´T </Unicode>
+<Unicode>ENOUGH.</Unicode>
+<Unicode></Unicode>
+<Unicode>You should be subscribing</Unicode>
+<Unicode>to our magazine, too.</Unicode>
+<Unicode>Because week in and week</Unicode>
+<Unicode>out the Nation brings you the</Unicode>
+<Unicode>likes of Katha Politt, Edward</Unicode>
+<Unicode>Sorel and Christopher Hitchens</Unicode>
+<Unicode>in every issue.</Unicode>
+<Unicode>They're not only some of</Unicode>
+<Unicode>the best writers and illustrators</Unicode>
+<Unicode>around - they do their best work</Unicode>
+<Unicode>for us.</Unicode>
+<Unicode></Unicode>
+<Unicode>The Nation.</Unicode>
+<Unicode></Unicode>
+The 3 unmatched pages are nearly empty (only page numbers, mostly image pages). Let me find them using their printed page numbers and surrounding issue context.
+
+Bash Find heresies_14 pages with matching page numbers
+IN
+# 0026 and 0027 are within heresies_14 context - search for pages with just page numbers "9" and "22"
+for page_num in 9 22; do
+  echo "=== looking for printed page $page_num in heresies_14 ==="
+  grep -l "<Unicode>$page_num</Unicode>" /Users/sophiehamann/master-thesis-code/data/raw/heresies_14_pagexml/page_*.xml | while read f; do
+    lines=$(grep -o '<Unicode>[^<]*</Unicode>' "$f" | grep -v '<Unicode></Unicode>' | wc -l)
+    echo "$f (non-empty lines: $lines)"
+  done
+done
+
+OUT
+=== looking for printed page 9 in heresies_14 ===
+/Users/sophiehamann/master-thesis-code/data/raw/heresies_14_pagexml/page_10.xml (non-empty lines:        1)
+=== looking for printed page 22 in heresies_14 ===
+/Users/sophiehamann/master-thesis-code/data/raw/heresies_14_pagexml/page_18.xml (non-empty lines:        1)
+Bash Find heresies_02 page with matching page numbers
+IN
+# 0056 is within heresies_02 context - search for page with page numbers 25, 26, 69
+echo "=== looking for printed pages 25/26/69 in heresies_02 ==="
+for page_num in 25 26 69; do
+  grep -l "<Unicode>$page_num</Unicode>" /Users/sophiehamann/master-thesis-code/data/raw/heresies_02_pagexml/page_*.xml 2>/dev/null | while read f; do
+    lines=$(grep -o '<Unicode>[^<]*</Unicode>' "$f" | grep -v '<Unicode></Unicode>' | wc -l)
+    echo "page_num=$page_num: $f (non-empty lines: $lines)"
+  done
+done
+
+OUT
+=== looking for printed pages 25/26/69 in heresies_02 ===
+page_num=25: /Users/sophiehamann/master-thesis-code/data/raw/heresies_02_pagexml/page_27.xml (non-empty lines:        5)
+page_num=25: /Users/sophiehamann/master-thesis-code/data/raw/heresies_02_pagexml/page_67.xml (non-empty lines:        3)
+page_num=26: /Users/sophiehamann/master-thesis-code/data/raw/heresies_02_pagexml/page_28.xml (non-empty lines:        2)
+page_num=26: /Users/sophiehamann/master-thesis-code/data/raw/heresies_02_pagexml/page_67.xml (non-empty lines:        3)
+page_num=69: /Users/sophiehamann/master-thesis-code/data/raw/heresies_02_pagexml/page_67.xml (non-empty lines:        3)
+Bash Verify heresies_02 page_67 matches 0056_p057
+IN
+grep -o '<Unicode>[^<]*</Unicode>' /Users/sophiehamann/master-thesis-code/data/raw/heresies_02_pagexml/page_67.xml
+
+OUT
+<Unicode>69</Unicode>
+<Unicode>25</Unicode>
+<Unicode>26</Unicode>
+All three unmatched pages are now identified. Let me add hardcoded fallbacks for these known-empty pages into the script and re-run.
+
+Read collect_ocr_pages_for_cer.py (lines 106-135)
+Edit collect_ocr_pages_for_cer.py
+Added 9 lines
+Now add the fallback check in main() before the text-based matching:
+
+Edit collect_ocr_pages_for_cer.py
+Added 14 lines
+Bash Re-run final version of script
+IN
+rm -rf /Users/sophiehamann/master-thesis-code/data/processed/training_data/ocr_pages_for_cer && python src/collect_ocr_pages_for_cer.py 2>&1 | tail -30
+
+OUT
+[MATCHED]  0111_p119.xml → heresies_06_pagexml/page_126.xml  (score=1204.0)
+[MATCHED]  0112_p120.xml → heresies_06_pagexml/page_130.xml  (score=1149.6)
+[MATCHED]  0113_p121.xml → heresies_07_pagexml/page_8.xml  (score=488.9)
+[MATCHED]  0114_p122.xml → heresies_07_pagexml/page_23.xml  (score=400.0)
+[MATCHED]  0115_p123.xml → heresies_07_pagexml/page_24.xml  (score=590.0)
+[MATCHED]  0116_p124.xml → heresies_07_pagexml/page_111.xml  (score=1127.6)
+[MATCHED]  0117_p125.xml → heresies_07_pagexml/page_123.xml  (score=1097.1)
+[MATCHED]  0118_p126.xml → heresies_08_pagexml/page_2.xml  (score=647.8)
+[MATCHED]  0119_p127.xml → heresies_08_pagexml/page_8.xml  (score=1066.6)
+[MATCHED]  0120_p128.xml → heresies_08_pagexml/page_104.xml  (score=1129.4)
+[MATCHED]  0121_p129.xml → heresies_08_pagexml/page_125.xml  (score=548.3)
+[MATCHED]  0122_p130.xml → heresies_08_pagexml/page_127.xml  (score=839.4)
+[MATCHED]  0123_p131.xml → heresies_09_pagexml/page_1.xml  (score=110.0)
+[MATCHED]  0124_p132.xml → heresies_09_pagexml/page_15.xml  (score=1748.8)
+[MATCHED]  0125_p133.xml → heresies_09_pagexml/page_48.xml  (score=935.5)
+[MATCHED]  0126_p134.xml → heresies_09_pagexml/page_72.xml  (score=1028.6)
+[MATCHED]  0127_p135.xml → heresies_09_pagexml/page_78.xml  (score=1388.8)
+[EXPLICIT] 0128_heresies1_page-0001.xml → heresies_01_pagexml/page_1.xml
+[EXPLICIT] 0129_heresies26_page-0002.xml → heresies_26_pagexml/page_2.xml
+[EXPLICIT] 0130_heresies26_page-0001.xml → heresies_26_pagexml/page_1.xml
+[EXPLICIT] 0131_heresies26_page-0003.xml → heresies_26_pagexml/page_3.xml
+[EXPLICIT] 0132_heresies27_page-0001.xml → heresies_27_pagexml/page_1.xml
+[EXPLICIT] 0133_heresies27_page-0002.xml → heresies_27_pagexml/page_2.xml
+[EXPLICIT] 0134_heresies27_page-0003.xml → heresies_27_pagexml/page_3.xml
+[EXPLICIT] 0135_heresies26_page-0004.xml → heresies_26_pagexml/page_4.xml
+
+============================================================
+Matched:   135 / 135
+Unmatched: 0 / 135
+Output:    /Users/sophiehamann/master-thesis-code/data/processed/training_data/ocr_pages_for_cer
+135/135 matched. Let me verify the output folder.
+
+Bash Verify output folder contents
+IN
+ls /Users/sophiehamann/master-thesis-code/data/processed/training_data/ocr_pages_for_cer/ | wc -l && ls /Users/sophiehamann/master-thesis-code/data/processed/training_data/ocr_pages_for_cer/ | head -10
+
+OUT
+     135
+0001_p002__heresies_01_pagexml__page_32.xml
+0002_p003__heresies_01_pagexml__page_51.xml
+0003_p004__heresies_01_pagexml__page_63.xml
+0004_p005__heresies_01_pagexml__page_89.xml
+0005_p006__heresies_10_pagexml__page_3.xml
+0006_p007__heresies_10_pagexml__page_33.xml
+0007_p008__heresies_10_pagexml__page_61.xml
+0008_p009__heresies_10_pagexml__page_67.xml
+0009_p010__heresies_10_pagexml__page_85.xml
+0010_p011__heresies_11_pagexml__page_20.xml
+All 135 files are in the output folder. The script is at src/collect_ocr_pages_for_cer.py and the output is at data/processed/training_data/ocr_pages_for_cer/.
+
+What was done:
+
+Each output file is named {gt_stem}__{issue_dir}__{page_stem}.xml so you can see exactly which ground truth page it corresponds to and where the source came from
+Strategy 1 (explicit): 8 pages whose filenames name the issue directly (e.g. 0128_heresies1_page-0001.xml → heresies_01_pagexml/page_1.xml)
+Strategy 2 (text matching): 124 pages matched by computing word-overlap + exact-line hits between the ground truth text and all 2764 source page XMLs
+Strategy 3 (manual fallback): 3 image-only pages with almost no text, identified by their printed page number and surrounding context, hardcoded in the script
+The output folder is ready to use for CER calculation — pair each file here with its corresponding ground truth page from data/processed/training_data/ground_truth/page/ using the leading 0001_, 0002_ etc. prefix.
+
+03_ocr_validation_new.ipynb#1-15
+ok, now, looking at 03_ocr_validation_new.ipynb this cell: 
+
+from jiwer import cer, process_characters
+
+gt_text  = " ".join(df_gt["text"].dropna().tolist())
+ocr_text = " ".join(df_ocr["text"].dropna().tolist())
+
+# overall CER
+error_rate = cer(gt_text, ocr_text)
+print(f"Character Error Rate: {error_rate:.2%}")
+
+# breakdown by error type
+details = process_characters(gt_text, ocr_text)
+print(f"Insertions:     {details.insertions}")
+print(f"Substitutions:  {details.substitutions}")
+print(f"Deletions:      {details.deletions}")
+print(f"Total characters in ground truth: {details.hits + details.deletions + details.substitutions}")
+
+please change this cell so the ground truth found here: /Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/combined_xml/combined.xml
+
+cna be compared to this: /Users/sophiehamann/master-thesis-code/data/processed/training_data/ocr_pages_for_cer
+
+
+this is the cell i want ot adjust: from jiwer import cer, process_characters
+
+gt_text  = " ".join(df_gt["text"].dropna().tolist())
+ocr_text = " ".join(df_ocr["text"].dropna().tolist())
+
+# overall CER
+error_rate = cer(gt_text, ocr_text)
+print(f"Character Error Rate: {error_rate:.2%}")
+
+# breakdown by error type
+details = process_characters(gt_text, ocr_text)
+print(f"Insertions:     {details.insertions}")
+print(f"Substitutions:  {details.substitutions}")
+print(f"Deletions:      {details.deletions}")
+print(f"Total characters in ground truth: {details.hits + details.deletions + details.substitutions}")
+Let me read the notebook to find the exact cell location.
+
+Read 03_ocr_validation_new.ipynb
+Now I need to use the NotebookEdit tool to update that specific cell. Let me fetch its schema first.
+
+Edit Notebook Cell 03_ocr_validation_new.ipynb:29e4dd43
+Failed
+from jiwer import cer, process_characters
+from lxml import etree
+from pathlib import Path
+
+NAMESPACE = {"pc": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15"}
+
+GT_PAGE_DIR = Path("/Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page")
+OCR_DIR     = Path("/Users/sophiehamann/master-thesis-code/data/processed/training_data/ocr_pages_for_cer")
+
+def extract_page_text(xml_path):
+    """Extract all TextLine Unicode texts from a PAGE XML, joined by space."""
+    tree = etree.parse(xml_path)
+    root = tree.getroot()
+    lines = []
+    for tl in root.findall(".//pc:TextLine", NAMESPACE):
+        u = tl.find("pc:TextEquiv/pc:Unicode", NAMESPACE)
+        if u is not None and u.text and u.text.strip():
+            lines.append(u.text.strip())
+    return " ".join(lines)
+
+# Build OCR lookup: gt_prefix (e.g. "0001_p002") -> ocr_file path
+ocr_lookup = {}
+for ocr_file in sorted(OCR_DIR.glob("*.xml")):
+    prefix = ocr_file.stem.split("__")[0]
+    ocr_lookup[prefix] = ocr_file
+
+# Collect matched GT and OCR texts in the same page order
+gt_texts  = []
+ocr_texts = []
+missing   = []
+
+for gt_file in sorted(GT_PAGE_DIR.glob("*.xml")):
+    prefix = gt_file.stem
+    if prefix in ocr_lookup:
+        gt_texts.append(extract_page_text(gt_file))
+        ocr_texts.append(extract_page_text(ocr_lookup[prefix]))
+    else:
+        missing.append(prefix)
+
+print(f"Pages compared: {len(gt_texts)}")
+if missing:
+    print(f"GT pages with no OCR match: {missing}")
+
+gt_text  = " ".join(gt_texts)
+ocr_text = " ".join(ocr_texts)
+
+# Overall CER
+error_rate = cer(gt_text, ocr_text)
+print(f"\nCharacter Error Rate: {error_rate:.2%}")
+
+# Breakdown by error type
+details = process_characters(gt_text, ocr_text)
+print(f"Insertions:    {details.insertions}")
+print(f"Substitutions: {details.substitutions}")
+print(f"Deletions:     {details.deletions}")
+print(f"Total characters in ground truth: {details.hits + details.deletions + details.substitutions}")
+Here's the code to replace that cell with:
+
+
+from jiwer import cer, process_characters
+from lxml import etree
+from pathlib import Path
+
+NAMESPACE = {"pc": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15"}
+
+GT_PAGE_DIR = Path("/Users/sophiehamann/master-thesis-code/data/processed/training_data/ground_truth/page")
+OCR_DIR     = Path("/Users/sophiehamann/master-thesis-code/data/processed/training_data/ocr_pages_for_cer")
+
+def extract_page_text(xml_path):
+    """Extract all TextLine Unicode texts from a PAGE XML, joined by space."""
+    tree = etree.parse(xml_path)
+    root = tree.getroot()
+    lines = []
+    for tl in root.findall(".//pc:TextLine", NAMESPACE):
+        u = tl.find("pc:TextEquiv/pc:Unicode", NAMESPACE)
+        if u is not None and u.text and u.text.strip():
+            lines.append(u.text.strip())
+    return " ".join(lines)
+
+# Build OCR lookup: gt_prefix (e.g. "0001_p002") -> ocr_file path
+ocr_lookup = {}
+for ocr_file in sorted(OCR_DIR.glob("*.xml")):
+    prefix = ocr_file.stem.split("__")[0]
+    ocr_lookup[prefix] = ocr_file
+
+# Collect matched GT and OCR texts in the same page order
+gt_texts  = []
+ocr_texts = []
+missing   = []
+
+for gt_file in sorted(GT_PAGE_DIR.glob("*.xml")):
+    prefix = gt_file.stem
+    if prefix in ocr_lookup:
+        gt_texts.append(extract_page_text(gt_file))
+        ocr_texts.append(extract_page_text(ocr_lookup[prefix]))
+    else:
+        missing.append(prefix)
+
+print(f"Pages compared: {len(gt_texts)}")
+if missing:
+    print(f"GT pages with no OCR match: {missing}")
+
+gt_text  = " ".join(gt_texts)
+ocr_text = " ".join(ocr_texts)
+
+# Overall CER
+error_rate = cer(gt_text, ocr_text)
+print(f"\nCharacter Error Rate: {error_rate:.2%}")
+
+# Breakdown by error type
+details = process_characters(gt_text, ocr_text)
+print(f"Insertions:    {details.insertions}")
+print(f"Substitutions: {details.substitutions}")
+print(f"Deletions:     {details.deletions}")
+print(f"Total characters in ground truth: {details.hits + details.deletions + details.substitutions}")
+What changed vs. the old cell:
+
+Instead of using df_gt and df_ocr (which couldn't be matched by filename), the new code reads files directly from the individual page directories
+It matches each GT page (e.g. 0001_p002.xml) to its corresponding OCR file in ocr_pages_for_cer/ using the common prefix (0001_p002) in the filename
+Text is extracted at the TextLine level (not TextRegion) — this is more appropriate for OCR comparison since PyLaia writes at the line level
+Pages are processed in the same sorted order on both sides, so the CER is calculated on truly aligned text

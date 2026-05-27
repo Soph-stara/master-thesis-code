@@ -1,0 +1,71 @@
+please look at the notebook 10_stemming_lemmatization.ipynb.
+please write a cell checking whether the lemmatization really worked how it should.15:41Claude hat geantwortet: It seems no file was uploaded.Check uploaded filesCheck uploaded filesIt seems no file was uploaded. Could you share the 10_stemming_lemmatization.ipynb file? You can drag and drop it into the chat.10_stemming_lemmatization.ipynb260 Zeilenipynb15:42Claude hat geantwortet: Here's a verification cell you can add after step 7.Here's a verification cell you can add after step 7. It checks the things that actually matter for your lemmatization:
+python# ── Verification: did lemmatization work correctly? ──────────────────────────
+
+import random
+from collections import Counter
+
+lemmatizer_check = WordNetLemmatizer()
+
+# 1. KNOWN WORD PAIRS: words that should have been reduced to a common base
+#    Format: (inflected_form, expected_lemma, wordnet_pos)
+known_pairs = [
+    ("feminists",  "feminist", wordnet.NOUN),
+    ("feminism",   "feminist", wordnet.NOUN),   # NOTE: WordNet won't merge these — good to know
+    ("heresies",   "heresy",   wordnet.NOUN),
+    ("published",  "publish",  wordnet.VERB),
+    ("running",    "run",      wordnet.VERB),
+    ("better",     "good",     wordnet.ADJ),
+    ("leaves",     "leaf",     wordnet.NOUN),
+    ("leaves",     "leave",    wordnet.VERB),
+]
+
+print("=== 1. Spot-check known word pairs ===")
+for word, expected, pos in known_pairs:
+    result = lemmatizer_check.lemmatize(word, pos)
+    status = "✓" if result == expected else "✗"
+    print(f"  {status}  '{word}' ({pos}) → '{result}'  (expected: '{expected}')")
+
+# 2. NO INFLECTED FORMS REMAIN: check that common suffixes were reduced
+#    (plurals -s/-es, past tense -ed, gerunds -ing)
+all_tokens = [t for tokens in df_h1["tokens"] for t in tokens]
+token_counts = Counter(all_tokens)
+
+suspicious = [
+    word for word, count in token_counts.items()
+    if (word.endswith("ing") or word.endswith("ings") or
+        word.endswith("ies") or word.endswith("ations"))
+    and len(word) > 6
+    and count > 5  # only flag frequent ones
+]
+print(f"\n=== 2. Potentially un-lemmatized tokens (freq > 5) ===")
+if suspicious:
+    for w in sorted(suspicious, key=lambda x: -token_counts[x])[:20]:
+        print(f"  '{w}': {token_counts[w]}x")
+else:
+    print("  None found — looks clean!")
+
+# 3. VARIANTS COLLAPSED: do word families now share a single form?
+word_families = [
+    ["feminist", "feminists"],
+    ["heresy", "heresies"],
+    ["publish", "published", "publishing"],
+    ["art", "arts"],
+    ["politic", "politics"],   # 'politics' is tricky — often stays as-is
+]
+
+print("\n=== 3. Are word-family variants collapsed into one form? ===")
+for family in word_families:
+    present = {w: token_counts.get(w, 0) for w in family}
+    print(f"  {present}")
+
+# 4. RANDOM SAMPLE: eyeball 5 random rows before vs after
+print("\n=== 4. Random sample of lemmatized token lists ===")
+for i in random.sample(range(len(df_h1)), min(5, len(df_h1))):
+    print(f"  row {i}: {df_h1['tokens'].iloc[i][:10]}")
+What each check does:
+
+Known word pairs — unit-test style: confirms the lemmatizer handles specific inflected forms correctly, including the POS-dependent case (leaves → leaf vs. leave).
+Suspicious suffixes — scans the full vocabulary for frequent tokens still carrying -ing, -ies, -ations that should have been reduced.
+Word family collapse — checks whether variant forms (e.g. feminists / feminist) now share a single entry, which is the whole point of lemmatization.
+Random row sample — a quick eyeball check on real data to catch anything unexpected.

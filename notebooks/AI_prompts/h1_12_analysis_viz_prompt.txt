@@ -1,0 +1,88 @@
+
+Claude hat die Antwort abgeschlossen
+1779804745046_image.png
+I am doing an analysis with a text corpus. There is one visualization where one word is dominating the other words in frequency. 
+This is the cell: 
+
+fig, ax = plt.subplots(figsize=(12, 6))
+
+for term in key_terms:
+    term_data = df_freq[df_freq["term"] == term]
+    ax.plot(term_data["volume"], term_data["relative_frequency"], marker="o", label=term)
+
+ax.set_xlabel("Volume")
+ax.set_ylabel("Relative frequency per 1000 words")
+ax.set_title("Diachronic Distribution of Core Feminist Terms")
+ax.legend(bbox_to_anchor=(1.05, 1))
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig("/Users/sophiehamann/master-thesis-code/data/output_files/graph1_frequency.png")
+plt.show()
+please write a cell of code, showing one (small)graph for each word.
+
+Mehr anzeigen
+16:12
+python
+fig, axes = plt.subplots(3, 4, figsize=(16, 10))
+axes = axes.flatten()
+
+for i, term in enumerate(key_terms):
+    ax = axes[i]
+    term_data = df_freq[df_freq["term"] == term]
+    ax.plot(term_data["volume"], term_data["relative_frequency"], marker="o", color=f"C{i}")
+    ax.set_title(term, fontweight="bold")
+    ax.set_xlabel("")
+    ax.set_ylabel("Freq per 1000 words")
+    ax.tick_params(axis="x", rotation=45, labelsize=7)
+    ax.grid(True, alpha=0.3)
+
+# Hide any unused subplots
+for j in range(len(key_terms), len(axes)):
+    axes[j].set_visible(False)
+
+plt.suptitle("Diachronic Distribution of Core Feminist Terms", fontsize=14, fontweight="bold", y=1.02)
+plt.tight_layout()
+plt.savefig("/Users/sophiehamann/master-thesis-code/data/output_files/graph1_frequency_small_multiples.png", bbox_inches="tight")
+plt.show()
+This uses a small multiples layout — one subplot per term — so "discourse" and "woman" no longer squash all the other lines. A few notes:
+
+The grid is 3×4, which fits up to 12 terms; any unused panels are hidden automatically.
+Each subplot gets its own y-axis scale, so even low-frequency terms like "body" or "nature" will show their variation clearly.
+Colors still match the C0, C1, … cycle so they stay visually distinct.
+If you have more or fewer than 12 terms, just change 3, 4 to something that fits (e.g. 4, 4 for 16 terms).
+can you also make a version where the y axis stays the same everywhere
+
+16:13
+Just add sharey=True to the subplots call:
+
+python
+fig, axes = plt.subplots(3, 4, figsize=(16, 10), sharey=True)
+axes = axes.flatten()
+
+for i, term in enumerate(key_terms):
+    ax = axes[i]
+    term_data = df_freq[df_freq["term"] == term]
+    ax.plot(term_data["volume"], term_data["relative_frequency"], marker="o", color=f"C{i}")
+    ax.set_title(term, fontweight="bold")
+    ax.set_ylabel("Freq per 1000 words" if i % 4 == 0 else "")
+    ax.tick_params(axis="x", rotation=45, labelsize=7)
+    ax.grid(True, alpha=0.3)
+
+for j in range(len(key_terms), len(axes)):
+    axes[j].set_visible(False)
+
+plt.suptitle("Diachronic Distribution of Core Feminist Terms", fontsize=14, fontweight="bold", y=1.02)
+plt.tight_layout()
+plt.savefig("/Users/sophiehamann/master-thesis-code/data/output_files/graph1_frequency_small_multiples_shared_y.png", bbox_inches="tight")
+plt.show()
+The only two changes from before:
+
+sharey=True locks all subplots to the same y-axis range, making frequencies directly comparable across terms.
+The y-axis label is only printed on the leftmost column (if i % 4 == 0) to avoid repetitive clutter.
+
+
+
+
+
+
+Claude ist eine KI und kann Fehler machen. Bitte überprüfe die Antworten.
