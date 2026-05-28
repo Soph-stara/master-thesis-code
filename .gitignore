@@ -26,3 +26,4 @@ __pycache__/
 notebooks/2204941/
 notebooks/foo/
 notebooks/heresies_01_pagexml*.venv-312/
+.venv-312/
