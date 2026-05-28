@@ -1,0 +1,286 @@
+
+Claude hat die Antwort abgeschlossen
+
+09_NER.ipynb
+ipynb
+
+
+09_NER_h3.ipynb
+403 Zeilen
+
+ipynb
+
+I am writing my masters thesis at the moment. for my second hypothesis, I have a NER analysis. i would like to update my jupyter notebook for my third hypothesis where there is also an outdated ner. 
+09_NER.ipynb is the updated ner for hypothesis 2
+09_NER_h3.ipynb is the outdated ner analysis. 
+please adapt the h3 ner jupyter notebook to the same style as for h2
+
+10:17
+
+Reading the updated NER notebook for hypothesis 2
+Reading the updated NER notebook for hypothesis 2
+Let me also read the truncated section of the H2 notebook:
+
+
+Reading truncated middle section of H2 NER notebook
+Reading truncated middle section of H2 NER notebook
+Now I have a full picture of both notebooks. Let me build the updated H3 version:
+
+
+Datei erstellt, datei lesen
+Datei erstellt, datei lesen
+Here's what was updated to match the H2 style:
+
+Model upgrade — switched from en_core_web_sm to en_core_web_trf, with the same rationale comment from H2 explaining why (RoBERTa-based, better on unusual names, more robust to fragmented text).
+
+New imports — added spacy_curated_transformers, Counter, and tqdm with tqdm.pandas().
+
+Restructured into 9 matching sections:
+
+Imports
+Loading corpus (with richer print output: shape, columns, region types)
+Issue number + volume label — now uses the same get_volume() with proper year-range labels (Vol1_1977-1978 etc.) instead of the old descriptive names, and includes the None guard
+NER extraction — split into df_authors / df_captions (mirroring H2's para/refs split), uses progress_apply for the progress bar
+Basic cleaning — separate clean_authors / clean_captions functions with the hyphen-aware word-count rule from H2
+Checking results — Counter-based inspection of both field types, same format as H2
+False positives & name mapping — uses the same clean_name() regex approach from H2; pre-seeded with "Patron Saint" and "Lucy R. Lippard" which were already in your old notebook, with a comment to extend after inspecting step 6
+One row per mention — renamed output df to df_persons (consistent with H2)
+Saving — updated output path to 09_h3_contributors.csv with the print("Saved to:", ...) confirmation
+
+09 ner h3 updated
+IPYNB 
+can you give me the cells here please
+
+10:27
+Here are all the cells:
+
+Cell 1 — Markdown (title + rationale)
+
+# Named Entity Recognition for H3 (author_creator and caption structural tags)
+
+Automatically find all person names in author_creator and caption fields and save them with their source file and volume information.
+
+I have decided to work with spacy´s en_core_web_trf model.
+
+For one, this model uses a real language model underneath (RoBERTa), additionally, while sm and lg use statistical features and word vectors, trf runs a full transformer that reads the whole sentence at once so it understands context.
+
+Furthermore, en_core_web_trf has the highest NER accuracy of all spaCy English models and it is better on rare and uncommon names which may appear in caption and contributor fields. The transformer generalises better to uncommon names by reading surrounding context.
+
+Additionally, because some caption fields contain fragmented or non-standard text, the choice was to use en_core_web_trf because Transformers are more robust to unusual token sequences than the statistical models.
+
+However, one trade-off one needs to be aware of is that this model is significantly slower, however, in this case, this will only take several minutes and not hours on end.
+
+For this Notebook, I have used the following documentation to help me write the code: 
+- [Named Entity Recognition](https://spacy.io/usage/linguistic-features#named-entities)
+- [English Model Comparison](https://spacy.io/models/en)
+- [Counter for Counting Name Frequencies](https://docs.python.org/3/library/collections.html#collections.Counter)
+- [Pandas for downloading and reshaping data](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.apply.html)
+- [tqdm for the progress bar](https://tqdm.github.io/)
+Cell 2 — Markdown
+
+#### 1. Imports
+
+I decided for spacy [because](https://www.geeksforgeeks.org/python/python-named-entity-recognition-ner-using-spacy/):
+Cell 3 — Code
+
+python
+import pandas as pd
+import spacy
+import spacy_curated_transformers  # I need to load en_core_web_trf
+import re
+from collections import Counter
+from tqdm import tqdm
+
+# this lets pandas show a progress bar when I use .apply()
+tqdm.pandas()
+
+# load the transformer model — more accurate than the small model
+# run once in terminal if not installed:
+# pip install spacy-transformers
+# python -m spacy download en_core_web_trf
+nlp = spacy.load("en_core_web_trf")
+Cell 4 — Markdown
+
+#### 2. Loading the H3 Corpus
+Cell 5 — Code
+
+python
+df = pd.read_csv("/Users/sophiehamann/master-thesis-code/data/processed/04_h3_clean.csv")
+
+print("Shape:", df.shape)
+print("\nColumns:", df.columns.tolist())
+print("\nRegion types:")
+print(df["region_type"].value_counts())
+print()
+print(df.head())
+Cell 6 — Markdown
+
+#### 3. Adding Issue Number and Volume Label
+Cell 7 — Code
+
+python
+def get_issue_number(filepath):
+    """Extract the issue number from the filename, e.g. heresies_08_combined → 8"""
+    match = re.search(r"heresies_(\d+)_combined", filepath)
+    return int(match.group(1)) if match else None
+
+def get_volume(issue_nr):
+    """Map issue number to a volume label"""
+    if issue_nr is None:
+        return None
+    if issue_nr <= 4:  return "Vol1_1977-1978"
+    if issue_nr <= 8:  return "Vol2_1978-1979"
+    if issue_nr <= 12: return "Vol3_1980-1981"
+    if issue_nr <= 16: return "Vol4_1981-1983"
+    if issue_nr <= 20: return "Vol5_1984-1985"
+    if issue_nr <= 24: return "Vol6_1987-1989"
+    if issue_nr <= 27: return "Vol7_1990-1993"
+    return None
+
+df["issue"]  = df["source_file"].apply(get_issue_number)
+df["volume"] = df["issue"].apply(get_volume)
+df = df[df["issue"] <= 14]
+
+print(df["volume"].value_counts())
+Cell 8 — Markdown
+
+#### 4. Extracting person names with Spacy (author_creator and caption separately)
+Cell 9 — Code
+
+python
+def extract_persons(text):
+    if pd.isna(text):
+        return []
+    doc = nlp(text)
+    return [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
+
+# split into two dataframes
+df_authors  = df[df["region_type"] == "author_creator"].copy()
+df_captions = df[df["region_type"] == "caption"].copy()
+
+print(f"Author/creator fields: {len(df_authors)} rows")
+print(f"Caption fields: {len(df_captions)} rows")
+
+# run NER on each separately
+df_authors["persons"]  = df_authors["text"].progress_apply(extract_persons)
+df_captions["persons"] = df_captions["text"].progress_apply(extract_persons)
+Cell 10 — Markdown
+
+#### 5. Basic Cleaning and Removing Noise (different rules for author_creator and caption)
+Cell 11 — Code
+
+python
+def clean_authors(persons):
+    cleaned = []
+    for name in persons:
+        name = name.replace("'s", "").strip()
+        if any(char.isdigit() for char in name):
+            continue
+        # author_creator fields: require 2+ words (hyphens count)
+        if len(name.replace("-", " ").split()) < 2:
+            continue
+        cleaned.append(name)
+    return cleaned
+
+def clean_captions(persons):
+    cleaned = []
+    for name in persons:
+        name = name.replace("'s", "").strip()
+        if any(char.isdigit() for char in name):
+            continue
+        # same 2-word rule as author fields — hyphens count as word separators
+        if len(name.replace("-", " ").split()) < 2:
+            continue
+        cleaned.append(name)
+    return cleaned
+
+df_authors["persons"]  = df_authors["persons"].apply(clean_authors)
+df_captions["persons"] = df_captions["persons"].apply(clean_captions)
+Cell 12 — Markdown
+
+#### 6. Checking results for both
+Cell 13 — Code
+
+python
+author_persons  = [name for persons in df_authors["persons"]  for name in persons]
+caption_persons = [name for persons in df_captions["persons"] for name in persons]
+
+print("=== AUTHOR/CREATOR FIELDS ===")
+print(f"Total mentions: {len(author_persons)}, Unique: {len(set(author_persons))}")
+for name, count in Counter(author_persons).most_common(20):
+    print(f"  {name}: {count}")
+
+print("\n=== CAPTION FIELDS ===")
+print(f"Total mentions: {len(caption_persons)}, Unique: {len(set(caption_persons))}")
+for name, count in Counter(caption_persons).most_common(20):
+    print(f"  {name}: {count}")
+Cell 14 — Markdown
+
+#### 7. Fix false positives and then combine both
+Cell 15 — Code
+
+python
+# I filled the false positives by looking at the most common names in both lists and checking which ones are not actually people.
+# I also added some name variations to the mapping.
+false_positives = {
+    "Patron Saint",
+    # add more after inspecting step 6 output
+}
+
+name_mapping = {
+    "Lucy R. Lippard": "Lucy Lippard",
+    # add more after inspecting step 6 output
+}
+
+def clean_name(name):
+    # strip leading/trailing punctuation like hyphens, commas, quotes
+    name = re.sub(r'^[^a-zA-ZÀ-ÿ]+', '', name)  # remove non-letters from start
+    name = re.sub(r'[^a-zA-ZÀ-ÿ]+$', '', name)  # remove non-letters from end
+    name = name.strip()
+
+    if not name:
+        return None
+    if name in false_positives:
+        return None
+    return name_mapping.get(name, name)
+
+for df_ in [df_authors, df_captions]:
+    df_["persons"] = df_["persons"].apply(
+        lambda names: [n for n in (clean_name(n) for n in names) if n is not None]
+    )
+
+# combine back into one dataframe
+df_combined = pd.concat([df_authors, df_captions])
+Cell 16 — Markdown
+
+#### 8. One row per person mention
+Cell 17 — Code
+
+python
+rows = []
+for _, row in df_combined.iterrows():
+    for person in row["persons"]:
+        rows.append({
+            "source_file": row["source_file"],
+            "issue":       row["issue"],
+            "volume":      row["volume"],
+            "region_type": row["region_type"],
+            "person":      person,
+        })
+
+df_persons = pd.DataFrame(rows)
+print("Shape:", df_persons.shape)
+print(df_persons.head(10))
+Cell 18 — Markdown
+
+#### 9. Saving
+Cell 19 — Code
+
+python
+out_path = "/Users/sophiehamann/master-thesis-code/data/processed/09_h3_contributors.csv"
+df_persons.to_csv(out_path, index=False)
+print("Saved to:", out_path)
+
+
+
+
