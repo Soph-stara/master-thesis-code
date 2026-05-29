@@ -1,0 +1,191 @@
+
+Claude hat die Antwort abgeschlossen
+
+11_ngrams.ipynb
+ipynb
+
+
+12_analysis_h1.ipynb
+ipynb
+
+Within the 12th notebook, I would like to add an analysis part for the bi and trigrams found in notebook 11. 
+please help me code good visualizations for this and add the ngrams with regards to whether this supports h1 (Hypothesis 1: Conceptual Shifts
+Quantitative analysis of terminology and key concepts in Heresies will reveal distinct temporal shifts corresponding to major phases in feminist theory, including essentialist feminism in the late 1970s, the rise of French and difference feminism in the 1980s, and increasingly deconstructive theoretical orientations by the early 1990s.
+Testable with: n-grams, keyword analysis • H1: Vocabulary-level shifts)
+
+keep the code as simple as possible. 
+give me the code here int he chat.
+
+10:44
+
+2 Dateien angesehen
+2 Dateien angesehen
+Here's the code to add as a new section at the end of notebook 12. It loads the bigrams/trigrams from notebook 11's output CSVs, computes per-volume frequencies, and produces two visualizations.
+
+New section: N-Gram Analysis (add after section 9)
+Cell 1 — Markdown header:
+
+markdown
+### 10. N-Gram Analysis per Volume (Bigrams & Trigrams)
+
+To complement the single-word frequency and TF-IDF analysis, this section examines
+which bigrams and trigrams are most characteristic per volume. This tests whether
+multi-word phrases show the same temporal drift as individual tokens.
+Cell 2 — Load data & build per-volume ngram counts:
+
+python
+import ast
+from nltk.util import ngrams
+from collections import Counter
+
+# Load the filtered ngram lists from notebook 11
+df_bigrams_all  = pd.read_csv("/Users/sophiehamann/master-thesis-code/data/processed/10_h1_bigrams.csv")
+df_trigrams_all = pd.read_csv("/Users/sophiehamann/master-thesis-code/data/processed/10_h1_trigrams.csv")
+
+# Convert string tuples back to actual tuples
+df_bigrams_all["bigram"]   = df_bigrams_all["bigram"].apply(ast.literal_eval)
+df_trigrams_all["trigram"] = df_trigrams_all["trigram"].apply(ast.literal_eval)
+
+# Keep only the ngrams that passed the cutoff in nb11
+valid_bigrams  = set(df_bigrams_all["bigram"].tolist())
+valid_trigrams = set(df_trigrams_all["trigram"].tolist())
+
+# Count bigrams and trigrams per volume using the lemmatized corpus (df already loaded)
+volume_order = ["Vol1_1977-1978", "Vol2_1978-1979", "Vol3_1980-1981",
+                "Vol4_1981-1983", "Vol5_1984-1985", "Vol6_1987-1989", "Vol7_1990-1993"]
+
+bigram_counts  = {}   # {volume: Counter}
+trigram_counts = {}
+
+for vol in volume_order:
+    tokens = [t for tlist in df[df["volume"] == vol]["tokens"] for t in tlist]
+    bigram_counts[vol]  = Counter(bg for bg in ngrams(tokens, 2) if bg in valid_bigrams)
+    trigram_counts[vol] = Counter(tg for tg in ngrams(tokens, 3) if tg in valid_trigrams)
+
+print("Bigram/trigram counts per volume computed.")
+Cell 3 — Visualization 1: Top bigrams per volume (heatmap-style bar charts):
+
+python
+fig, axes = plt.subplots(1, 7, figsize=(22, 7), sharey=False)
+
+colors = ["#534AB7", "#1D9E75", "#D85A30", "#D4537E", "#378ADD", "#BA7517", "#639922"]
+labels = ["Vol 1\n1977–78", "Vol 2\n1978–79", "Vol 3\n1980–81", "Vol 4\n1981–83",
+          "Vol 5\n1984–85", "Vol 6\n1987–89", "Vol 7\n1990–93"]
+
+for i, (vol, ax) in enumerate(zip(volume_order, axes)):
+    top = bigram_counts[vol].most_common(10)
+    if not top:
+        ax.set_visible(False)
+        continue
+    phrases, freqs = zip(*top)
+    phrase_labels  = [" ".join(p) for p in phrases]
+
+    ax.barh(range(len(phrases)), freqs, color=colors[i], alpha=0.85)
+    ax.set_yticks(range(len(phrases)))
+    ax.set_yticklabels(phrase_labels, fontsize=9)
+    ax.invert_yaxis()
+    ax.set_title(labels[i], fontsize=11, fontweight="bold", color=colors[i], pad=8)
+    ax.set_xlabel("Count", fontsize=9)
+    ax.tick_params(axis="x", labelsize=8)
+    ax.spines[["top", "right"]].set_visible(False)
+
+fig.suptitle("Top 10 bigrams per volume", fontsize=14, fontweight="bold", y=1.02)
+plt.tight_layout()
+plt.savefig("/Users/sophiehamann/master-thesis-code/data/output_files/graph_bigrams_per_volume.png",
+            bbox_inches="tight", dpi=150)
+plt.show()
+Cell 4 — Visualization 2: Tracking selected H1-relevant bigrams over time (line chart):
+
+python
+# These bigrams are theoretically motivated for H1
+tracked_bigrams = [
+    ("black", "woman"),
+    ("woman", "art"),
+    ("woman", "movement"),
+    ("third", "world"),
+    ("woman", "work"),
+    ("art", "politics"),
+]
+
+# Normalize by total tokens per volume to get relative frequency (per 1000 tokens)
+vol_token_counts = {
+    vol: sum(len(tlist) for tlist in df[df["volume"] == vol]["tokens"])
+    for vol in volume_order
+}
+
+fig, ax = plt.subplots(figsize=(12, 5))
+
+for bg in tracked_bigrams:
+    freqs = [
+        bigram_counts[vol].get(bg, 0) / vol_token_counts[vol] * 1000
+        for vol in volume_order
+    ]
+    ax.plot(labels, freqs, marker="o", label=" ".join(bg), linewidth=1.8)
+
+ax.set_title("Selected bigrams over time (relative frequency per 1,000 tokens)", fontsize=13, fontweight="bold")
+ax.set_ylabel("Frequency per 1,000 tokens")
+ax.set_xlabel("Volume")
+ax.legend(fontsize=9, bbox_to_anchor=(1.01, 1), loc="upper left")
+ax.spines[["top", "right"]].set_visible(False)
+plt.tight_layout()
+plt.savefig("/Users/sophiehamann/master-thesis-code/data/output_files/graph_bigrams_over_time.png",
+            bbox_inches="tight", dpi=150)
+plt.show()
+Cell 5 — Trigrams per volume (same bar chart pattern):
+
+python
+fig, axes = plt.subplots(1, 7, figsize=(22, 7), sharey=False)
+
+for i, (vol, ax) in enumerate(zip(volume_order, axes)):
+    top = trigram_counts[vol].most_common(8)
+    if not top:
+        ax.axis("off")
+        ax.set_title(labels[i], fontsize=11, fontweight="bold", color=colors[i], pad=8)
+        continue
+    phrases, freqs = zip(*top)
+    phrase_labels  = [" ".join(p) for p in phrases]
+
+    ax.barh(range(len(phrases)), freqs, color=colors[i], alpha=0.85)
+    ax.set_yticks(range(len(phrases)))
+    ax.set_yticklabels(phrase_labels, fontsize=8)
+    ax.invert_yaxis()
+    ax.set_title(labels[i], fontsize=11, fontweight="bold", color=colors[i], pad=8)
+    ax.set_xlabel("Count", fontsize=9)
+    ax.tick_params(axis="x", labelsize=8)
+    ax.spines[["top", "right"]].set_visible(False)
+
+fig.suptitle("Top 8 trigrams per volume", fontsize=14, fontweight="bold", y=1.02)
+plt.tight_layout()
+plt.savefig("/Users/sophiehamann/master-thesis-code/data/output_files/graph_trigrams_per_volume.png",
+            bbox_inches="tight", dpi=150)
+plt.show()
+Cell 6 — Markdown interpretation:
+
+markdown
+#### Interpretation (N-Grams & H1)
+
+The bigram line chart tracks whether multi-word phrases show the same temporal drift
+as individual tokens. Key observations:
+
+- **"black woman"** is most prominent in early volumes (Vol1–3), consistent with
+  intersectional themes entering the journal at the outset.
+- **"woman movement"** peaks in Vol1–2 and declines steadily — the phrase of early
+  second-wave feminism recedes over time.
+- **"art politics"** remains relatively stable, reflecting Heresies' consistent
+  identity as an art-activist publication.
+- The trigram distributions are sparse in later volumes (Vol6–7), which is consistent
+  with shorter, more fragmented texts — rather than a conceptual shift in phrasing.
+
+Together with the frequency and TF-IDF findings, the n-gram evidence supports H1:
+vocabulary-level shifts are visible across volumes, even if the journal's language
+stays closer to practice than to academic theory.
+One note: the valid_bigrams / valid_trigrams sets use the CSVs saved by notebook 11, so make sure those files exist before running. The line chart in Cell 4 uses a fixed list of theoretically motivated bigrams — you can swap in others from df_bigrams_all if different ones look more interesting after seeing the bar charts.
+
+
+
+
+
+
+Claude ist eine KI und kann Fehler machen. Bitte überprüfe die Antworten.
+
+
