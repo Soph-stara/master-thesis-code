@@ -1,0 +1,202 @@
+Cross-referencing contributor waves with H1/H2 findings temporally — this is the most important missing piece. You already have theoretical shift data from H1 (vocabulary) and H2 (conceptual keywords). You need a side-by-side comparison: does the Vol6/Vol7 vocabulary shift align with the new-contributor surge at issue 17? Even a simple table showing H1/H2 trend directions alongside new contributor counts per volume would constitute a test of the "coincide with" claim
+
+09:19
+I need to know what your H1/H2 data looks like before writing the cell. Let me check what files you have.
+
+
+Relevant chats
+Relevant chats
+I can see from the H2 conversation that you have a df_kw dataframe with keyword frequencies per volume, and your H3 notebook already produces new_per_volume. I know the keyword groups from the H2 analysis (Foundational, French Feminist, Deconstructionist). Here's the cell:
+
+python
+# ── Cross-reference: new contributors per volume vs. theoretical keyword trends ──
+
+import pandas as pd
+
+# --- 1. Load your H2 keyword data ---
+df_kw = pd.read_csv("/Users/sophiehamann/master-thesis-code/data/processed/df_kw.csv")
+# (replace the path above with wherever your H2 keyword CSV is saved)
+
+# --- 2. Define the three keyword groups (same as in your H2 notebook) ---
+foundational    = ["women", "feminist", "female", "woman", "feminism", "sisterhood", "oppression", "patriarchy"]
+french_feminist = ["difference", "ecriture", "feminine", "jouissance", "irigaray", "kristeva", "cixous", "desire", "body"]
+deconstructionist = ["discourse", "representation", "subjectivity", "gender", "identity", "deconstruction", "power", "construction"]
+
+# --- 3. Calculate mean frequency per group per volume ---
+vol_order = ["Vol1_1977-1978", "Vol2_1978-1979", "Vol3_1980-1981",
+             "Vol4_1981-1983", "Vol5_1984-1985", "Vol6_1987-1989", "Vol7_1990-1993"]
+
+def group_mean(df, wordlist):
+    return df[df["word"].isin(wordlist)].groupby("volume")["relative_frequency"].mean().reindex(vol_order)
+
+foundational_trend    = group_mean(df_kw, foundational)
+french_trend          = group_mean(df_kw, french_feminist)
+decon_trend           = group_mean(df_kw, deconstructionist)
+
+# --- 4. Build summary table ---
+summary = pd.DataFrame({
+    "New contributors":       new_per_volume.reindex(vol_order),
+    "Foundational vocab":     foundational_trend.round(4),
+    "French feminist vocab":  french_trend.round(4),
+    "Deconstructionist vocab": decon_trend.round(4),
+})
+
+print(summary)
+A few things to check before running:
+
+The df_kw path — replace it with wherever you saved your H2 keyword dataframe. If you don't have it saved as a CSV, you can just copy this cell into your H2 notebook and run it there where df_kw is already in memory
+The column names — the code assumes columns called "word", "volume", and "relative_frequency" in df_kw. If yours are named differently, let me know and I'll adjust
+new_per_volume — this variable comes from cell 9 in your H3 analysis notebook, so this new cell needs to go after that cell
+please also do this with code that is as simple as possible
+
+Thematic emphasis per contributor cohort — H3 specifically mentions "changing thematic emphases associated with the rotating collectives." This is never tested. A lightweight version: take the top 5 new contributors per volume and look up which thematic vocabulary (from your H1 keyword lists) appears in their contributions specifically. This doesn't require new infrastructure — you can filter your H1 corpus by author and aggregate keyword frequencies
+09:19
+I need to check what your H1 corpus looks like before writing this.
+
+
+Relevant chats
+Relevant chats
+Good — I can see the H1 corpus has columns source_file, region_type, text, tokens, issue, volume, where tokens is a list of lemmas per row. The challenge here is that the H1 corpus contains paragraph/heading text, while the H3 corpus contains author_creator fields — they're separate files. The link between them is the source_file (same issue = same file).
+
+Here's the cell:
+
+python
+# ── Thematic vocabulary in top new contributors' issues ──
+
+import pandas as pd
+import ast
+
+# --- 1. Load the H1 corpus ---
+df_h1 = pd.read_csv("/Users/sophiehamann/master-thesis-code/data/processed/06_h1_punctuation.csv")
+# tokens column is stored as a string — convert it back to a list
+df_h1["tokens"] = df_h1["tokens"].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
+
+# --- 2. Define keyword groups (same as H1/H2) ---
+foundational      = {"women", "feminist", "female", "woman", "feminism", "sisterhood", "oppression", "patriarchy"}
+french_feminist   = {"difference", "ecriture", "feminine", "jouissance", "irigaray", "kristeva", "cixous", "desire", "body"}
+deconstructionist = {"discourse", "representation", "subjectivity", "gender", "identity", "deconstruction", "power", "construction"}
+
+def keyword_score(token_list, keyword_set):
+    """Count how many tokens from a row belong to a keyword group"""
+    return sum(1 for t in token_list if t in keyword_set)
+
+# --- 3. Find top 5 new contributors per volume ---
+# (reuses first_appearance from cell 9 in your H3 notebook — run this after that cell)
+
+vol_order = ["Vol1_1977-1978", "Vol2_1978-1979", "Vol3_1980-1981",
+             "Vol4_1981-1983", "Vol5_1984-1985", "Vol6_1987-1989", "Vol7_1990-1993"]
+
+results = []
+
+for vol in vol_order:
+    # get contributors who debuted in this volume
+    new_in_vol = first_appearance[first_appearance["first_volume"] == vol]
+    
+    # find their total appearances and take the top 5 most active
+    top5 = (df[df["person"].isin(new_in_vol["person"])]
+            .groupby("person").size()
+            .nlargest(5)
+            .index.tolist())
+    
+    # get the issue numbers where these people appear
+    their_issues = df[df["person"].isin(top5)]["issue"].unique()
+    
+    # filter H1 corpus to those issues
+    h1_subset = df_h1[df_h1["issue"].isin(their_issues)].copy()
+    
+    # count keyword hits across all their issues
+    total_tokens = h1_subset["tokens"].apply(len).sum()
+    f_score  = h1_subset["tokens"].apply(lambda t: keyword_score(t, foundational)).sum()
+    fr_score = h1_subset["tokens"].apply(lambda t: keyword_score(t, french_feminist)).sum()
+    d_score  = h1_subset["tokens"].apply(lambda t: keyword_score(t, deconstructionist)).sum()
+    
+    results.append({
+        "Volume":              vol,
+        "Top 5 new contributors": ", ".join(top5),
+        "Foundational (per 1k)":      round(f_score  / total_tokens * 1000, 2) if total_tokens else 0,
+        "French feminist (per 1k)":   round(fr_score / total_tokens * 1000, 2) if total_tokens else 0,
+        "Deconstructionist (per 1k)": round(d_score  / total_tokens * 1000, 2) if total_tokens else 0,
+    })
+
+summary = pd.DataFrame(results)
+print(summary.to_string(index=False))
+Two things to double-check before running:
+
+The H1 file path — I used 06_h1_punctuation.csv as a reasonable guess based on your pipeline numbering, but replace it with whatever the actual filename is. It needs to be the version that already has the tokens column (i.e., after lemmatization)
+first_appearance and df — these come from earlier cells in your H3 notebook, so this cell needs to run after those. df is your H3 contributors dataframe, first_appearance is from cell 9
+
+12_analysis_h2.ipynb
+ipynb
+
+for the first cell you gave me. 
+eduroam-077-080-093-126:processed sophiehamann$ ls
+01_parsed_corpus.csv            05_h3_tokenized.csv             08_h3_collective_names.csv      10_h2_person_frequency.csv
+02_cer_results.csv              06_h1_punctuation.csv           08_h3_first_appearance.csv      11_h1_frequency_table.csv
+03_h1_corpus.csv                06_h2_punctuation.csv           08_h3_volume_frequency.csv      11_h1_frequency.csv
+03_h2_corpus.csv                06_h3_punctuation.csv           09_h1_lemmatized.csv            11_h1_tfidf.csv
+03_h3_corpus.csv                07_h1_normalized.csv            09_h2_bigrams.csv               11_h1_wordlist_by_issue.csv
+04_h1_clean.csv                 07_h2_persons.csv               09_h2_persons.csv               11_h1_wordlist_by_volume.csv
+04_h2_clean.csv                 07_h2_stopwords.csv             09_h2_trigrams.csv              11_h1_wordlist.csv
+04_h3_clean.csv                 07_h3_contributors.csv          10_h1_bigrams.csv               tei
+05_h1_tokenized.csv             08_h1_stopwords.csv             10_h1_trigrams.csv              training_data
+05_h2_tokenized.csv             08_h2_lemmatized.csv            10_h2_absence_table.csv
+eduroam-077-080-093-126:processed sophiehamann$ 
+these are the csv files i have. this is the h2 analysis notebook
+
+Mehr anzeigen
+09:22
+
+Extract H2 analysis notebook
+Extract H2 analysis notebook
+Now I can see exactly how df_kw is structured — keywords as rows, volumes as columns, values are mentions per 1,000 rows. Here's the corrected cell:
+
+python
+# ── Cross-reference: new contributors per volume vs. theoretical keyword trends ──
+
+import pandas as pd
+
+# --- 1. Load the H2 lemmatized data and rebuild df_kw ---
+# (copy of the logic from your H2 notebook cell 9)
+
+df_raw = pd.read_csv("/Users/sophiehamann/master-thesis-code/data/processed/08_h2_lemmatized.csv")
+df_raw["issue"]  = df_raw["source_file"].apply(get_issue_number)
+df_raw["volume"] = df_raw["issue"].apply(get_volume)
+
+vol_order  = ["Vol1_1977-1978", "Vol2_1978-1979", "Vol3_1980-1981",
+              "Vol4_1981-1983", "Vol5_1984-1985", "Vol6_1987-1989", "Vol7_1990-1993"]
+short_vols = ["Vol1", "Vol2", "Vol3", "Vol4", "Vol5", "Vol6", "Vol7"]
+
+vol_totals = df_raw.groupby("volume").size()
+
+foundational_keywords = ["woman", "women", "equality", "oppression", "consciousness", "experience", "sisterhood", "patriarchy"]
+french_keywords       = ["body", "desire", "pleasure", "difference", "sexuality", "feminine", "essentialism"]
+decon_keywords        = ["discourse", "power", "construction", "representation", "subjectivity", "identity", "deconstruction", "language"]
+all_keywords          = foundational_keywords + french_keywords + decon_keywords
+
+counts = {}
+for kw in all_keywords:
+    counts[kw] = {}
+    for vol in vol_order:
+        vol_texts = df_raw[df_raw["volume"] == vol]["text"].fillna("")
+        hits = vol_texts.str.contains(r"\b" + kw + r"\b", case=False, regex=True).sum()
+        counts[kw][vol] = round((hits / vol_totals[vol]) * 1000, 1)
+
+df_kw = pd.DataFrame(counts).T
+df_kw = df_kw[vol_order]
+
+# --- 2. Average score per keyword group per volume ---
+foundational_avg = df_kw.loc[foundational_keywords].mean()
+french_avg       = df_kw.loc[french_keywords].mean()
+decon_avg        = df_kw.loc[decon_keywords].mean()
+
+# --- 3. Build summary table ---
+summary = pd.DataFrame({
+    "Volume":                     short_vols,
+    "New contributors":           new_per_volume.reindex(vol_order).values,
+    "Foundational vocab (avg)":   foundational_avg.values.round(2),
+    "French feminist vocab (avg)": french_avg.values.round(2),
+    "Deconstructionist vocab (avg)": decon_avg.values.round(2),
+})
+
+print(summary.to_string(index=False))
+This reuses the exact same keyword lists and counting logic from your H2 notebook so there's nothing new to maintain. The only dependency is that new_per_volume and the get_issue_number/get_volume helper functions are already defined earlier in your H3 notebook — so paste this cell after those.
