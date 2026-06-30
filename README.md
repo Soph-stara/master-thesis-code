@@ -27,7 +27,6 @@ notebooks/
   AI_prompts/                     # Prompts used with AI assistants during development
 
 src/
-  collect_ocr_pages_for_cer.py    # Select pages for character error rate evaluation
   training/
     select_ground_truth.py        # Select ground truth pages for HTR training
 
